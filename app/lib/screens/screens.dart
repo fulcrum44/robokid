@@ -1,0 +1,1 @@
+export 'package:robokid/screens/main_screen.dart';
