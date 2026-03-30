@@ -16,6 +16,6 @@ export const moverRobot = {
   ],
   "previousStatement": null,
   "nextStatement": null,
-  "colour": 120,
-  "tooltip": "Controla los movimiento"
+  "colour": 230,
+  "tooltip": "Elige hacia dónde quieres que ruede el robot"
 };
