@@ -12,6 +12,8 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenStateAlumn extends State<RegisterScreen> {
+  //para ver el texto luego cuando pones la contraseña
+  bool obscureText = true;
   //Instancio la clase del supabaseServices
   final SupabaseServices supabaseServices = SupabaseServices();
   // Booleano para el AlertDialog
@@ -106,7 +108,19 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                 hintText: 'Contraseña',
                 keyboardType: TextInputType.visiblePassword,
                 icon: Icons.lock_outline,
-                obscureText: true,
+                obscureText: obscureText,
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      obscureText = !obscureText;
+                    });
+                  },
+                  icon: Icon(
+                    obscureText
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                ),
                 controller: passwordController,
                 enabled: !buttonIsLoading,
                 validator: (value) {
