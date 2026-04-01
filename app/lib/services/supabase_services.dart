@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:robokid/constants/supabase_config.dart';
+
+class SupabaseServices {
+  final String urlDatabase = SupabaseConfig.urlSupabase;
+  final String anonKeyDatabase = SupabaseConfig.anonKeySupabase;
+  //conexion al supabase
+  Future<void> supabaseConnection() async {
+    await Supabase.initialize(url: urlDatabase, anonKey: anonKeyDatabase);
+  }
+
+  //registri de usuaerio al supabase
+  Future<void> registrarUsuario({
+    required String name,
+    required String lastName,
+    required String email,
+    required String password,
+  }) async {
+    final supabase = Supabase.instance.client;
+
+    await supabase.from('Usuarios').insert({
+      'email': email,
+      'name': name,
+      'last_name': lastName,
+      'password': password,
+    });
+  }
+  Future<Map<String, dynamic>?> iniciarSesion({
+    required String email,
+    required String password,
+  }) async {
+    final supabase = Supabase.instance.client;
+
+    try {
+      // Usamos .match() para obligar a que AMBOS campos coincidan a la vez
+      final inicioSesion = await supabase
+          .from('Usuarios')
+          .select()
+          .match({
+            'email': email,
+            'password': password,
+          })
+          .maybeSingle();
+
+      //Comprbamos si de verdad estan igual, pa que no de fallos (o te meta solo con uno de los dos que ma estao pasando)
+      if (inicioSesion != null) {
+        if (inicioSesion['email'] == email && inicioSesion['password'] == password) {
+          return inicioSesion; 
+        } else {
+          return null; 
+        }
+      }
+
+      return null; 
+      
+    } catch (e) {
+      debugPrint('Error en la consulta de login: $e');
+      return null;
+    }
+  }
+}
