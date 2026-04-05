@@ -60,6 +60,10 @@ class AppTheme {
       contentTextStyle: TextStyle(color: Colors.white),
       behavior: SnackBarBehavior.floating,
     ),
+
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: robokids,
+    ),
   );
 
   // TEMA OSCURO
@@ -114,6 +118,9 @@ class AppTheme {
       backgroundColor: Colors.black,
       contentTextStyle: TextStyle(color: Colors.white),
       behavior: SnackBarBehavior.floating,
+    ),
+     progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: Colors.white,
     ),
   );
 }

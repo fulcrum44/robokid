@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:robokid/widgets/custom_appbar.dart';
 
-class BlocksScreen extends StatefulWidget {
+class BlockScreen extends StatefulWidget {
    
-  const BlocksScreen({super.key});
+  const BlockScreen({super.key});
 
   @override
-  State<BlocksScreen> createState() => _BlocksScreenState();
+  State<BlockScreen> createState() => _BlockScreenState();
 }
 
-class _BlocksScreenState extends State<BlocksScreen> {
+class _BlockScreenState extends State<BlockScreen> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      appBar: customappBar(context: context, logo: 'Robokids'),
+      appBar: CustomAppBar(logo: 'Robokids'),
       body: Center(
          child: Text('Aqui irian cosas'),
       ),

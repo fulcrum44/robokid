@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:robokid/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:robokid/constants/supabase_config.dart';
 
 class SupabaseServices {
   final String urlDatabase = SupabaseConfig.urlSupabase;
@@ -9,7 +9,7 @@ class SupabaseServices {
   Future<void> supabaseConnection() async {
     await Supabase.initialize(url: urlDatabase, anonKey: anonKeyDatabase);
   }
-
+  static final _supabase = Supabase.instance.client;
   //registri de usuaerio al supabase
   Future<void> registrarUsuario({
     required String name,
@@ -17,9 +17,8 @@ class SupabaseServices {
     required String email,
     required String password,
   }) async {
-    final supabase = Supabase.instance.client;
 
-    await supabase.from('Usuarios').insert({
+    await _supabase.from('Usuarios').insert({
       'email': email,
       'name': name,
       'last_name': lastName,
@@ -30,11 +29,11 @@ class SupabaseServices {
     required String email,
     required String password,
   }) async {
-    final supabase = Supabase.instance.client;
+
 
     try {
       // Usamos .match() para obligar a que AMBOS campos coincidan a la vez
-      final inicioSesion = await supabase
+      final inicioSesion = await _supabase
           .from('Usuarios')
           .select()
           .match({

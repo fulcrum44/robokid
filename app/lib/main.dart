@@ -5,8 +5,8 @@ import 'package:robokid/services/supabase_services.dart';
 import 'package:robokid/theme/app_theme.dart';
 
 void main() async {
-  final supabaseServices = SupabaseServices();
-  await supabaseServices.supabaseConnection();
+  WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseServices().supabaseConnection();
   runApp(const MyApp());
 }
 

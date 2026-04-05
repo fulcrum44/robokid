@@ -16,8 +16,6 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
   bool obscureText = true;
   //Instancio la clase del supabaseServices
   final SupabaseServices supabaseServices = SupabaseServices();
-  // Booleano para el AlertDialog
-  bool loadTime = false;
   // Booleano para el botón de registro
   bool buttonIsLoading = false;
   final formKey = GlobalKey<FormState>();
@@ -29,25 +27,6 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
   TextEditingController lastNameController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    // Listener para el FocusNode del campo de teléfono
-    focusNode.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-    // Temporizador para el AlertDialog
-    Future.delayed(Duration(seconds: 7), () {
-      if (mounted) {
-        setState(() {
-          loadTime = true;
-        });
-      }
-    });
-  }
-
-  @override
   void dispose() {
     focusNode.dispose();
     super.dispose();
@@ -56,13 +35,9 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Color del CircularProgressIndicator
-    final loadingColor = theme.brightness == Brightness.light
-        ? AppTheme.lightTheme.primaryColorLight
-        : AppTheme.darkTheme.primaryColorDark;
 
     return Scaffold(
-      appBar: customappBar(context: context, logo: 'Robokids'),
+      appBar: CustomAppBar(logo: 'Robokids'),
       backgroundColor: theme.scaffoldBackgroundColor,
       // Para que el teclado no empuje los SnackBars
       resizeToAvoidBottomInset: false,
@@ -127,7 +102,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                   if (value!.isEmpty) {
                     return 'Por favor introduzca la contraseña';
                   } else if (!RegExp(
-                    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[a-zA-Z\d@$!%*?&#]{8,}$',
+                    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[^\s]{8,}$',
                   ).hasMatch(value)) {
                     return 'Al menos 8 caracteres, una letra mayúscula y minúscula, \nun número y un carácter especial';
                   } else {
@@ -237,12 +212,34 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                       ? SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(
-                            color: loadingColor,
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Registrarse'),
+                      :  Text('Registrarse', style: theme.textTheme.titleMedium,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              Text(
+                'O',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: theme.elevatedButtonTheme.style?.copyWith(
+                    backgroundColor: WidgetStateProperty.all(AppTheme.robokids),
+                  ),
+                  onPressed: () => Navigator.pushNamed(context, 'login'),
+
+                  child: Text(
+                    'Volver a la pantalla de login',
+                    style: theme.textTheme.titleMedium,
+                  ),
                 ),
               ),
             ],
