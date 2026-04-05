@@ -1,31 +1,37 @@
 import 'package:flutter/material.dart';
 
-PreferredSizeWidget customappBar({
-  required BuildContext context,
-  String? logo,
-  bool showTitle = true,
-  bool automaticallyImplyLeading = false,
-  List<Widget>? actions, 
-}) {
-  return AppBar(
-    automaticallyImplyLeading: automaticallyImplyLeading,
-    centerTitle: true,
-    scrolledUnderElevation: 0,
-    title: showTitle? Image.asset(checkLogo(context, logo), height: 50): null,
-    actions: actions,
-  );
-}
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String? logo;
+  final bool showTitle;
+  final bool automaticallyImplyLeading;
 
-String checkLogo(BuildContext context, String? logo) {
-  final isLight = Theme.of(context).brightness == Brightness.light;
+  const CustomAppBar({
+    super.key,
+    this.logo,
+    this.showTitle = true,
+    this.automaticallyImplyLeading = false,
+  });
 
-  switch (logo) {
-    case 'Robokids':
-      return isLight
-          ? 'assets/batmanClaro.jpeg'
-          : 'assets/batmanOscuro.jpeg' ;
-    default:
-      return 'Batman';
+  String _checkLogo(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    switch (logo) {
+      case 'Robokids':
+        return isLight ? 'assets/batmanClaro.jpeg' : 'assets/batmanOscuro.jpeg';
+      default:
+        return 'Batman';
+    }
   }
-}
 
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      centerTitle: true,
+      scrolledUnderElevation: 0,
+      title: showTitle ? Image.asset(_checkLogo(context), height: 50) : null,
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}

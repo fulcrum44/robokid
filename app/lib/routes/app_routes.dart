@@ -19,14 +19,9 @@ class AppRoutes {
       screen: const RegisterScreen(),
     ),
     MenuOption(
-      route: 'blocksScreenUser',
+      route: 'blocksScreen',
       name: 'BlocksScreenUser',
-      screen: const BlocksUserScreen(),
-    ),
-     MenuOption(
-      route: 'blocksScreenInvitate',
-      name: 'blocksScreenInvitate',
-      screen: const BlocksInvitateScreen(),
+      screen: const BlockScreen(),
     ),
   ];
 

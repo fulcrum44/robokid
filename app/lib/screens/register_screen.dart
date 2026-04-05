@@ -37,7 +37,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: customappBar(context: context, logo: 'Robokids'),
+      appBar: CustomAppBar(logo: 'Robokids'),
       backgroundColor: theme.scaffoldBackgroundColor,
       // Para que el teclado no empuje los SnackBars
       resizeToAvoidBottomInset: false,
