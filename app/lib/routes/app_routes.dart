@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:robokid/constants/menu_options.dart';
 import 'package:robokid/screens/screens.dart';
 
 
@@ -22,7 +21,12 @@ class AppRoutes {
     MenuOption(
       route: 'blocksScreenUser',
       name: 'BlocksScreenUser',
-      screen: const BlocksScreen(),
+      screen: const BlocksUserScreen(),
+    ),
+     MenuOption(
+      route: 'blocksScreenInvitate',
+      name: 'blocksScreenInvitate',
+      screen: const BlocksInvitateScreen(),
     ),
   ];
 
@@ -43,4 +47,14 @@ class AppRoutes {
     //te lleva a la de login
   } 
 }
-  
+class MenuOption {
+  final String route;
+  final String name;
+  final Widget screen;
+
+  MenuOption({
+    required this.route, 
+    required this.name, 
+    required this.screen
+  });
+}

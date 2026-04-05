@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:robokid/widgets/custom_appbar.dart';
 
-class BlocksScreen extends StatefulWidget {
+class BlocksUserScreen extends StatefulWidget {
    
-  const BlocksScreen({super.key});
+  const BlocksUserScreen({super.key});
 
   @override
-  State<BlocksScreen> createState() => _BlocksScreenState();
+  State<BlocksUserScreen> createState() => _BlocksUserScreenState();
 }
 
-class _BlocksScreenState extends State<BlocksScreen> {
+class _BlocksUserScreenState extends State<BlocksUserScreen> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(

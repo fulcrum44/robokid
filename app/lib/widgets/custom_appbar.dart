@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-PreferredSizeWidget? customappBar({
+PreferredSizeWidget customappBar({
   required BuildContext context,
   String? logo,
   bool showTitle = true,

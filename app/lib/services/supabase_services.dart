@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:robokid/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:robokid/constants/supabase_config.dart';
 
 class SupabaseServices {
   final String urlDatabase = SupabaseConfig.urlSupabase;
@@ -9,7 +9,7 @@ class SupabaseServices {
   Future<void> supabaseConnection() async {
     await Supabase.initialize(url: urlDatabase, anonKey: anonKeyDatabase);
   }
-
+  static final supabase = Supabase.instance.client;
   //registri de usuaerio al supabase
   Future<void> registrarUsuario({
     required String name,
@@ -17,7 +17,7 @@ class SupabaseServices {
     required String email,
     required String password,
   }) async {
-    final supabase = Supabase.instance.client;
+
 
     await supabase.from('Usuarios').insert({
       'email': email,

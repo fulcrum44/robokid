@@ -179,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               )
                             : Text(
                                 'Iniciar sesión',
-                                style: theme.textTheme.titleSmall?.copyWith(
+                                style: theme.textTheme.titleMedium?.copyWith(
                                   color: Colors.white,
                                 ),
                               ),
@@ -198,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       OutlinedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, 'forgotPassword');
+                          Navigator.pushNamed(context, 'blocksScreenInvitate');
                         },
                         child: Text(
                           'Continuar como invitado',
