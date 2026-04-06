@@ -10,6 +10,7 @@ class BlockScreen extends StatefulWidget {
 }
 
 class _BlockScreenState extends State<BlockScreen> {
+<<<<<<< Antonio
   
   @override
   Widget build(BuildContext context) {
@@ -18,6 +19,14 @@ class _BlockScreenState extends State<BlockScreen> {
       appBar: CustomAppBar(logo: 'Robokids'),
       body: Center(
          child: Text('Aqui irian cosas', style: theme.textTheme.titleMedium,),
+=======
+  @override
+  Widget build(BuildContext context) {
+    return  Scaffold(
+      appBar: CustomAppBar(logo: 'Robokids'),
+      body: Center(
+         child: Text('Aqui irian cosas'),
+>>>>>>> main
       ),
     );
   }
