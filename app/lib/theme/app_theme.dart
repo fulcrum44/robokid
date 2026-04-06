@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   // Colores personalizados
   static const Color robokids = Color.fromARGB(255, 16, 171, 238);
-
   // TEMA CLARO
   static final ThemeData lightTheme = ThemeData.light().copyWith(
     // Color primario

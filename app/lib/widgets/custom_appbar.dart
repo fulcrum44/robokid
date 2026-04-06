@@ -12,23 +12,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.automaticallyImplyLeading = false,
   });
 
-  String _checkLogo(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    switch (logo) {
-      case 'Robokids':
-        return isLight ? 'assets/batmanClaro.jpeg' : 'assets/batmanOscuro.jpeg';
-      default:
-        return 'Batman';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: automaticallyImplyLeading,
       centerTitle: true,
       scrolledUnderElevation: 0,
-      title: showTitle ? Image.asset(_checkLogo(context), height: 50) : null,
+      title: showTitle ? Image.asset('assets/ROBOKIDS2.png', height: 130) : null,
     );
   }
 
