@@ -50,6 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
+      
         appBar: CustomAppBar(logo: 'Robokids'),
         backgroundColor: theme.scaffoldBackgroundColor,
         // Para que el teclado no empuje los SnackBars
