@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:robokid/services/supabase_services.dart';
+import 'package:robokid/services/firebase_services.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
 
@@ -14,8 +14,8 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenStateAlumn extends State<RegisterScreen> {
   //para ver el texto luego cuando pones la contraseña
   bool obscureText = true;
-  //Instancio la clase del supabaseServices
-  final SupabaseServices supabaseServices = SupabaseServices();
+  //Instancio la clase del firebase
+  final FirebaseServices firebaseServices = FirebaseServices();
   // Booleano para el botón de registro
   bool buttonIsLoading = false;
   final formKey = GlobalKey<FormState>();
@@ -172,15 +172,14 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                           setState(() => buttonIsLoading = true);
 
                           try {
-                            await supabaseServices.registrarUsuario(
-                              name: name,
-                              lastName: lastName,
+                            final user = await firebaseServices.createUser(
                               email: email,
                               password: password,
                             );
+                           await user!.sendEmailVerification();
                             if (context.mounted) {
                               CustomSnackBar.showSnackBar(
-                                '¡Registro completado!',
+                                '¡Correo de verificación enviado! Comprueba spam',
                                 context,
                                 theme,
                               );

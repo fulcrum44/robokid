@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:robokid/services/supabase_services.dart';
+import 'package:robokid/services/firebase_services.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
 
@@ -30,8 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //Instancio la clase del supabaseServices
-    final SupabaseServices supabaseServices = SupabaseServices();
+    //Instancio la clase del firebase
+    final FirebaseServices firebaseServices = FirebaseServices();
     final theme = Theme.of(context);
     // Color del borde de los contenedores
     final containerBorder = theme.brightness == Brightness.light
@@ -50,10 +50,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-<<<<<<< Antonio
-      
-=======
->>>>>>> main
         appBar: CustomAppBar(logo: 'Robokids'),
         backgroundColor: theme.scaffoldBackgroundColor,
         // Para que el teclado no empuje los SnackBars
@@ -140,11 +136,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                 try {
                                   //le decimos qie espero a ver si devuelve datos antes de poner el snabar y de qe te lleve a la pantalla
-                                  final usuario = await supabaseServices
-                                      .iniciarSesion(
-                                        email: email,
-                                        password: password,
-                                      );
+                                  final usuario = await firebaseServices.login(
+                                    email: email,
+                                    password: password,
+                                  );
                                   if (usuario != null) {
                                     if (context.mounted) {
                                       CustomSnackBar.showSnackBar(
