@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:robokid/services/firebase_services.dart';
 import 'package:robokid/theme/app_theme.dart';
@@ -176,7 +177,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                               email: email,
                               password: password,
                             );
-                           await user!.sendEmailVerification();
+                            await user!.sendEmailVerification();
                             if (context.mounted) {
                               CustomSnackBar.showSnackBar(
                                 '¡Correo de verificación enviado! Comprueba spam',
@@ -192,11 +193,39 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                                 );
                               }
                             });
+                          } on FirebaseAuthException catch (e) {
+                            //Si hay un error porque no encontro al usuario; no salta el siguiente print
+                            if (e.code == 'email-already-in-use') {
+                             if (context.mounted) {
+                              CustomSnackBar.showSnackBar(
+                                '¡El usuario ya está registrado',
+                                context,
+                                theme,
+                              );
+                            }
+                              //Si hay un error porque la contraseña es incorrecta; no salta el siguiente print
+                            } else if (e.code == 'weak-password') {
+                              if (context.mounted) {
+                              CustomSnackBar.showSnackBar(
+                                'Contraseña demasiado débil',
+                                context,
+                                theme,
+                              );
+                            }
+                            } else {
+                              if (context.mounted) {
+                              CustomSnackBar.showSnackBar(
+                                'Error en la conexion a Firebase',
+                                context,
+                                theme,
+                              );
+                            }
+                            }
                           } catch (error) {
                             debugPrint('Error en el registro: $error');
                             if (context.mounted) {
                               CustomSnackBar.showSnackBar(
-                                'Error al registrar: $error',
+                                'Error al registrar',
                                 context,
                                 theme,
                               );
@@ -213,8 +242,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      :  Text('Registrarse', style: theme.textTheme.titleMedium,
-                      ),
+                      : Text('Registrarse', style: theme.textTheme.titleMedium),
                 ),
               ),
               const SizedBox(height: 30),

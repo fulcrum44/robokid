@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:robokid/services/firebase_services.dart';
@@ -160,6 +161,37 @@ class _LoginScreenState extends State<LoginScreen> {
                                         theme,
                                       );
                                     }
+                                  }
+                                } on FirebaseAuthException catch (e) {
+                                  //Si hay un error porque no encontro al usuario; no salta el siguiente print
+                                  if (e.message!.contains(
+                                    'credential is incorrect',
+                                  )) {
+                                    print(e);
+                                    if (context.mounted) {
+                                      CustomSnackBar.showSnackBar(
+                                        'Usuario no encontrado o credenciales incorrectas',
+                                        context,
+                                        theme,
+                                      );
+                                    }
+                                 
+                                  } else {
+                                    if (context.mounted) {
+                                      CustomSnackBar.showSnackBar(
+                                        'Error en la conexion a Firebase',
+                                        context,
+                                        theme,
+                                      );
+                                    }
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    CustomSnackBar.showSnackBar(
+                                      'Error al iniciar sesión',
+                                      context,
+                                      theme,
+                                    );
                                   }
                                 } finally {
                                   if (mounted) {
