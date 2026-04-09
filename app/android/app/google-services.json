@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "79447508615",
+    "project_id": "robokids-66c04",
+    "storage_bucket": "robokids-66c04.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:79447508615:android:7bea69ecea463af98e5a22",
+        "android_client_info": {
+          "package_name": "com.example.robokid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVHOM3cKHyYFp6-o-1rl5PWQGpnYNujSI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
