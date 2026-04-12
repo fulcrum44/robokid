@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-        appBar: CustomAppBar(logo: 'Robokids'),
+        appBar: CustomAppBar(),
         backgroundColor: theme.scaffoldBackgroundColor,
         // Para que el teclado no empuje los SnackBars
         resizeToAvoidBottomInset: false,
@@ -150,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       );
                                       Navigator.pushNamed(
                                         context,
-                                        'blocksScreen',
+                                        'navegation',
                                       );
                                     }
                                   } else {
@@ -229,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       OutlinedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, 'blocksScreen');
+                          Navigator.pushNamed(context, 'navegation');
                         },
                         child: Text(
                           'Continuar como invitado',
