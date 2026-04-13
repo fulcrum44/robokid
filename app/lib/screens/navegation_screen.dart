@@ -20,9 +20,14 @@ class _NavegationScreenState extends State<NavegationScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+     body: IndexedStack( index: _selectedIndex, children: _screens, ),
 
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
@@ -34,7 +39,6 @@ class _NavegationScreenState extends State<NavegationScreen> {
             icon: Icon(Icons.history_outlined),
             label: 'Historial',
           ),
-          
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,

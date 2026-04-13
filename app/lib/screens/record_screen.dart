@@ -31,52 +31,69 @@ class RecordScreen extends StatelessWidget {
                       horizontal: 16,
                       vertical: 8,
                     ),
-                    child: Theme(
-                      data: theme.copyWith(dividerColor: Colors.transparent),
-                      child: ExpansionTile(
-                        iconColor: theme.iconTheme.color,
-                        collapsedIconColor: theme.iconTheme.color,
-                        textColor: theme.textTheme.titleMedium?.color,
-                        collapsedTextColor: theme.textTheme.titleMedium?.color,
-                        title: Text(
-                          'Prueba 1',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text.rich(
-                          TextSpan(
-                            style: theme.textTheme.titleSmall,
-                            children: [
-                              TextSpan(
-                                text: 'Creado el:',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Prueba 1',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
+                                const SizedBox(height: 4),
+                                Text.rich(
+                                  TextSpan(
+                                    style: theme.textTheme.titleSmall,
+                                    children: [
+                                      TextSpan(
+                                        text: 'Creado el:',
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      TextSpan(
+                                        text: ' 15/04/2006 ',
+                                        style: theme.textTheme.titleSmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  size: 24,
+                                  color: theme.iconTheme.color,
+                                ),
+                                onPressed: () {},
                               ),
-                              TextSpan(
-                                text: ' 15/04/2006 ',
-                                style: theme.textTheme.titleSmall,
+                              IconButton(
+                                icon: Icon(
+                                  Icons.cloud_download_outlined,
+                                  size: 24,
+                                  color: theme.iconTheme.color,
+                                ),
+                                onPressed: () {},
                               ),
                             ],
                           ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 24),
-                              onPressed: () {},
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.cloud_download_outlined,
-                                size: 24,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
                   ),
@@ -85,52 +102,47 @@ class RecordScreen extends StatelessWidget {
                       horizontal: 16,
                       vertical: 8,
                     ),
-                    child: Theme(
-                      data: theme.copyWith(dividerColor: Colors.transparent),
-                      child: ExpansionTile(
-                        iconColor: theme.iconTheme.color,
-                        collapsedIconColor: theme.iconTheme.color,
-                        textColor: theme.textTheme.titleMedium?.color,
-                        collapsedTextColor: theme.textTheme.titleMedium?.color,
-                        title: Text(
-                          'Prueba 2',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    child: ListTile(
+                      iconColor: theme.iconTheme.color,
+                      textColor: theme.textTheme.titleMedium?.color,
+                      title: Text(
+                        'Prueba 2',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        subtitle: Text.rich(
-                          TextSpan(
-                            style: theme.textTheme.titleSmall,
-                            children: [
-                              TextSpan(
-                                text: 'Creado el:',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' 20/04/2006 ',
-                                style: theme.textTheme.titleSmall,
-                              ),
-                            ],
-                          ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      ),
+                      subtitle: Text.rich(
+                        TextSpan(
+                          style: theme.textTheme.titleSmall,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 24),
-                              onPressed: () {},
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.cloud_download_outlined,
-                                size: 24,
+                            TextSpan(
+                              text: 'Creado el:',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              onPressed: () {},
+                            ),
+                            TextSpan(
+                              text: ' 20/04/2006 ',
+                              style: theme.textTheme.titleSmall,
                             ),
                           ],
                         ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, size: 24),
+                            onPressed: () {},
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.cloud_download_outlined,
+                              size: 24,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ],
                       ),
                     ),
                   ),

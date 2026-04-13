@@ -150,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       );
                                       Navigator.pushNamed(
                                         context,
-                                        'navegation',
+                                        'navigation',
                                       );
                                     }
                                   } else {
@@ -229,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       OutlinedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, 'navegation');
+                          Navigator.pushNamed(context, 'navigation');
                         },
                         child: Text(
                           'Continuar como invitado',

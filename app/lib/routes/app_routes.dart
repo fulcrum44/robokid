@@ -29,7 +29,7 @@ class AppRoutes {
       screen: const RecordScreen(),
     ),
      MenuOption(
-      route: 'navegation',
+      route: 'navigation',
       name: 'Navegation',
       screen: const NavegationScreen(),
     ),
