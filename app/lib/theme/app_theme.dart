@@ -60,8 +60,9 @@ class AppTheme {
       behavior: SnackBarBehavior.floating,
     ),
 
-    progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: robokids,
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: robokids),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
     ),
   );
 
@@ -118,8 +119,9 @@ class AppTheme {
       contentTextStyle: TextStyle(color: Colors.white),
       behavior: SnackBarBehavior.floating,
     ),
-     progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: Colors.white,
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: Colors.white),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: Colors.grey.shade900,
     ),
   );
 }

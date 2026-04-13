@@ -23,6 +23,17 @@ class AppRoutes {
       name: 'BlocksScreenUser',
       screen: const BlockScreen(),
     ),
+     MenuOption(
+      route: 'record',
+      name: 'Record',
+      screen: const RecordScreen(),
+    ),
+     MenuOption(
+      route: 'navigation',
+      name: 'Navegation',
+      screen: const NavegationScreen(),
+    ),
+    
   ];
 
   // Método para mapear la lista de rutas

@@ -12,11 +12,13 @@ class BlockScreen extends StatefulWidget {
 class _BlockScreenState extends State<BlockScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return  Scaffold(
-      appBar: CustomAppBar(logo: 'Robokids'),
+      appBar: CustomAppBar(),
       body: Center(
-         child: Text('Aqui irian cosas'),
+         child: Text('Aqui irian cosas', style: theme.textTheme.titleMedium,),
       ),
+      
     );
   }
 }
