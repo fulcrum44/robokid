@@ -1,10 +1,15 @@
 import * as Blockly from 'blockly';
+import { arduinoGenerator } from './generators/arduino_generator.js';
+
 import { moverRobot } from './blocks/movimiento.js';
 import { cambiarVelocidad } from './blocks/velocidad.js';
 import { leerDistancia, detectarObstaculo } from './blocks/sensor.js';
 import { moverMotorGrados } from './blocks/motor_grados.js';
 import { esperarSegundos } from './blocks/tiempo.js';
 
+import './generators/sensor_distancia.js';
+import './generators/motores.js';
+import './generators/tiempo.js';
 
 Blockly.common.defineBlocksWithJsonArray([
   moverRobot, 
@@ -30,7 +35,9 @@ const workspace = Blockly.inject('blocklyDiv', {
       { kind: 'block', type: 'leer_distancia' },
       { kind: 'block', type: 'detectar_obstaculo' }
     ]
-  }
+  },
+  scrollbars: true,
+  trashcan: true,
 });
 
 export default workspace;
