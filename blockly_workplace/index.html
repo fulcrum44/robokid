@@ -3,10 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blockly</title>
+    <title>Editor de bloques</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      #blocklyDiv {
+        flex: 1;
+        height: 100vh;
+        width: 100%;
+      }
+
+      #toolbar {
+        display: flex;
+        justify-content: flex-end;
+        height: 48px;
+        background: white;
+        align-items: center;
+        padding: 0 16px;
+        gap: 12px;
+      }
+
+      #btn-compilar {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+    </style>
   </head>
   <body>
-    <div id="blocklyDiv" style="height: 100vh; width: 100%;"></div>
-    <script type="module" src="/src/main.js"></script>
+    <div id="blocklyDiv"></div>
+    <div id="toolbar">
+      <button id="btn-compilar">▶ Compilar</button>
+    </div>
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>
