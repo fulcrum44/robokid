@@ -148,9 +148,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                         context,
                                         theme,
                                       );
-                                      Navigator.pushNamed(
+                                      Navigator.pushNamedAndRemoveUntil(
                                         context,
                                         'navigation',
+                                        (route) => false
                                       );
                                     }
                                   } else {
