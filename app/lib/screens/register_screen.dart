@@ -186,7 +186,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                     }
                     Future.delayed(const Duration(seconds: 1), () {
                       if (context.mounted) {
-                        Navigator.pushReplacementNamed(
+                        Navigator.pushNamed(
                           context,
                           'login',
                         );
