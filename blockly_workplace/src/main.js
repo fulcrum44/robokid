@@ -40,4 +40,40 @@ const workspace = Blockly.inject('blocklyDiv', {
   trashcan: true,
 });
 
-export default workspace;
+// exponer workspace para acceso desde el webview
+window.workspace = workspace;
+
+// funciones puente para comunicacion con Flutter
+window.requestCode = function() {
+  const code = arduinoGenerator.workspaceToCode(workspace);
+  try {
+    FlutterChannel.postMessage(JSON.stringify({ type: 'arduinoCode', data: code }));
+  } catch (e) {
+    console.log('FlutterChannel no disponible:', code);
+  }
+};
+
+window.requestWorkspaceState = function() {
+  const state = Blockly.serialization.workspaces.save(workspace);
+  try {
+    FlutterChannel.postMessage(JSON.stringify({ type: 'workspaceState', data: JSON.stringify(state) }));
+  } catch (e) {
+    console.log('FlutterChannel no disponible');
+  }
+};
+
+window.loadWorkspace = function(jsonString) {
+  const state = JSON.parse(jsonString);
+  Blockly.serialization.workspaces.load(state, workspace);
+};
+
+window.clearWorkspace = function() {
+  workspace.clear();
+};
+
+// avisar a Flutter que Blockly ya cargo
+try {
+  FlutterChannel.postMessage(JSON.stringify({ type: 'blocklyReady' }));
+} catch (e) {
+  console.log('Blockly listo (sin FlutterChannel)');
+}

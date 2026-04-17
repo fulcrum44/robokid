@@ -38,6 +38,8 @@ dependencies:
   firebase_core: ^4.6.0
   cloud_firestore: ^6.2.0
   firebase_auth: ^6.3.0
+  webview_flutter: ^4.10.0
+  webview_flutter_android: ^4.3.0
 
 
 dev_dependencies:
