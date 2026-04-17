@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:robokid/services/firebase_crud.dart';
 import 'package:robokid/services/firebase_services.dart';
-import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -28,7 +28,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
 
   @override
   void initState() {
-    super.initState();    
+    super.initState();
   }
 
   @override
@@ -46,7 +46,10 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
       // Para que el teclado no empuje los SnackBars
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.0225, horizontal: MediaQuery.of(context).size.height * 0.0225),
+        padding: EdgeInsets.symmetric(
+          vertical: MediaQuery.of(context).size.height * 0.0225,
+          horizontal: MediaQuery.of(context).size.height * 0.0225,
+        ),
         child: Form(
           key: formKey,
           child: Column(
@@ -113,7 +116,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                 },
               ),
 
-             SizedBox(height: MediaQuery.of(context).size.height * 0.0175),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.0175),
 
               // Nombre
               LoginFormWidget(
@@ -136,109 +139,107 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.035),
 
               // Botón de registro
+              CustomRegisterButton(
+                theme: theme,
+                content: buttonIsLoading
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                        width: MediaQuery.of(context).size.height * 0.0225,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text('Registrarse', style: theme.textTheme.titleMedium),
+                // El botón se deshabilia si la panalla está cargando
+                onPressed: buttonIsLoading
+                    ? null
+                    : () async {
+                        FocusScope.of(context).unfocus();
 
-              CustomRegisterButton(theme: theme,
-              content: buttonIsLoading
-              ? SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.0225,
-                  width: MediaQuery.of(context).size.height * 0.0225,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  'Registrarse',
-                  style: theme.textTheme.titleMedium,
-                ),
-              // El botón se deshabilia si la panalla está cargando
-              onPressed: buttonIsLoading
-              ? null
-              : () async {
-                  FocusScope.of(context).unfocus();
+                        if (!formKey.currentState!.validate()) {
+                          CustomSnackBar.showSnackBar(
+                            'Por favor, rellena todos los campos',
+                            context,
+                            theme,
+                          );
+                          return;
+                        }
 
-                  if (!formKey.currentState!.validate()) {
-                    CustomSnackBar.showSnackBar(
-                      'Por favor, rellena todos los campos',
-                      context,
-                      theme,
-                    );
-                    return;
-                  }
+                        final String email = emailController.text.trim();
+                        final String lastName = lastNameController
+                            .text // está sin usar, pendiente de un user_sevice con un insertUsuario()
+                            .trim();
+                        final String name = nameController.text
+                            .trim(); // está sin usar, pendiente de un user_sevice con un insertUsuario()
 
-                  final String email = emailController.text.trim();
-                  final String lastName = lastNameController.text // está sin usar, pendiente de un user_sevice con un insertUsuario()
-                      .trim();
-                  final String name = nameController.text.trim(); // está sin usar, pendiente de un user_sevice con un insertUsuario()
+                        setState(() => buttonIsLoading = true);
 
+                        try {
+                          final user = await firebaseAuth.createUser(
+                            email: email,
+                            password: passwordController
+                                .text, // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
+                          );
+                          await insertUsuario(user!.uid, name, lastName, email);
+                          await user.sendEmailVerification();
 
-                  setState(() => buttonIsLoading = true);
-
-                  try {
-                    final user = await firebaseAuth.createUser(
-                      email: email,
-                      password: passwordController.text, // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
-                    );
-                    await user!.sendEmailVerification();
-                    if (context.mounted) {
-                      CustomSnackBar.showSnackBar(
-                        '¡Correo de verificación enviado! Comprueba spam',
-                        context,
-                        theme,
-                      );
-                    }
-                    Future.delayed(const Duration(seconds: 1), () {
-                      if (context.mounted) {
-                        Navigator.pushNamed(
-                          context,
-                          'login',
-                        );
-                      }
-                    });
-                  } on FirebaseAuthException catch (e) {
-                    //Si hay un error porque no encontro al usuario; no salta el siguiente print
-                    if (e.code == 'email-already-in-use') {
-                      if (context.mounted) {
-                      CustomSnackBar.showSnackBar(
-                        '¡El usuario ya está registrado',
-                        context,
-                        theme,
-                      );
-                    }
-                      //Si hay un error porque la contraseña es incorrecta; no salta el siguiente print
-                    } else if (e.code == 'weak-password') {
-                      if (context.mounted) {
-                      CustomSnackBar.showSnackBar(
-                        'Contraseña demasiado débil',
-                        context,
-                        theme,
-                      );
-                    }
-                    } else {
-                      if (context.mounted) {
-                      CustomSnackBar.showSnackBar(
-                        'Error en la conexion a Firebase',
-                        context,
-                        theme,
-                      );
-                    }
-                    }
-                  } catch (error) {
-                    debugPrint('Error en el registro: $error');
-                    if (context.mounted) {
-                      CustomSnackBar.showSnackBar(
-                        'Error al registrar',
-                        context,
-                        theme,
-                      );
-                    }
-                  } finally {
-                    // Usamos finally para asegurar que el botón se reactive
-                    // pase lo que pase, a menos que hayamos navegado fuera.
-                    setState(() => buttonIsLoading = false);
-                  }
-                },
+                          if (context.mounted) {
+                            CustomSnackBar.showSnackBar(
+                              '¡Correo de verificación enviado! Comprueba spam',
+                              context,
+                              theme,
+                            );
+                          }
+                          Future.delayed(const Duration(seconds: 1), () {
+                            if (context.mounted) {
+                              Navigator.pushNamed(context, 'login');
+                            }
+                          });
+                        } on FirebaseAuthException catch (e) {
+                          //Si hay un error porque no encontro al usuario; no salta el siguiente print
+                          if (e.code == 'email-already-in-use') {
+                            if (context.mounted) {
+                              CustomSnackBar.showSnackBar(
+                                '¡El usuario ya está registrado',
+                                context,
+                                theme,
+                              );
+                            }
+                            //Si hay un error porque la contraseña es incorrecta; no salta el siguiente print
+                          } else if (e.code == 'weak-password') {
+                            if (context.mounted) {
+                              CustomSnackBar.showSnackBar(
+                                'Contraseña demasiado débil',
+                                context,
+                                theme,
+                              );
+                            }
+                          } else {
+                            if (context.mounted) {
+                              CustomSnackBar.showSnackBar(
+                                'Error en la conexion a Firebase',
+                                context,
+                                theme,
+                              );
+                            }
+                          }
+                        } catch (error) {
+                          debugPrint('Error en el registro: $error');
+                          if (context.mounted) {
+                            CustomSnackBar.showSnackBar(
+                              'Error al registrar',
+                              context,
+                              theme,
+                            );
+                          }
+                        } finally {
+                          // Usamos finally para asegurar que el botón se reactive
+                          // pase lo que pase, a menos que hayamos navegado fuera.
+                          setState(() => buttonIsLoading = false);
+                        }
+                      },
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.035),
-              
+
               Text(
                 'Ó',
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -249,12 +250,13 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.035),
 
               CustomRegisterButton(
-              theme: theme,
-              content: Text(
-                'Iniciar sesión',
-                style: theme.textTheme.titleMedium
+                theme: theme,
+                content: Text(
+                  'Iniciar sesión',
+                  style: theme.textTheme.titleMedium,
+                ),
+                onPressed: () => Navigator.pushNamed(context, 'login'),
               ),
-              onPressed: () => Navigator.pushNamed(context, 'login'))
             ],
           ),
         ),
