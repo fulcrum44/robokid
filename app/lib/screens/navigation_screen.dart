@@ -11,7 +11,7 @@ class NavegationScreen extends StatefulWidget {
 class _NavegationScreenState extends State<NavegationScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [BlockScreen(), RecordScreen()];
+  final List<Widget> _screens = const [BlockScreen(), RecordScreen(), AjustesScreen()];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -30,6 +30,7 @@ class _NavegationScreenState extends State<NavegationScreen> {
      body: IndexedStack( index: _selectedIndex, children: _screens, ),
 
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.widgets_outlined),
@@ -38,6 +39,10 @@ class _NavegationScreenState extends State<NavegationScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.history_outlined),
             label: 'Historial',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_outlined),
+            label: 'Ajustes',
           ),
         ],
         currentIndex: _selectedIndex,
