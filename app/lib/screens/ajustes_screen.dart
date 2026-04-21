@@ -14,8 +14,10 @@ class AjustesScreen extends StatefulWidget {
 }
 
 class _AjustesScreenState extends State<AjustesScreen> {
+  // Tema seleccionado, por defecto sigue el sistema
   String _selectedTheme = 'system';
 
+  // Nombre y apellido por separado para poder editarlos individualmente
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
 
@@ -24,10 +26,12 @@ class _AjustesScreenState extends State<AjustesScreen> {
     super.initState();
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
+    // Cargamos el tema y el nombre al entrar a la pantalla
     _loadCurrentTheme();
     _loadUserName();
   }
 
+  // Leemos el tema guardado en el almacenamiento del teléfono
   void _loadCurrentTheme() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -35,24 +39,26 @@ class _AjustesScreenState extends State<AjustesScreen> {
     });
   }
 
+  // Partimos el displayName en nombre y apellido
   void _loadUserName() {
     final user = FirebaseAuth.instance.currentUser;
     if (user?.displayName != null) {
       final parts = user!.displayName!.split(' ');
       _firstNameController.text = parts.isNotEmpty ? parts.first : '';
-      _lastNameController.text = parts.length > 1
-          ? parts.sublist(1).join(' ')
-          : '';
+      _lastNameController.text =
+          parts.length > 1 ? parts.sublist(1).join(' ') : '';
     }
   }
 
   @override
   void dispose() {
+    // Liberamos los controllers al salir de la pantalla
     _firstNameController.dispose();
     _lastNameController.dispose();
     super.dispose();
   }
 
+  // Guarda el nombre en Firebase y muestra confirmación
   Future<void> _saveSettings() async {
     final user = FirebaseAuth.instance.currentUser;
     final theme = Theme.of(context);
@@ -61,6 +67,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
       if (user != null &&
           (_firstNameController.text.isNotEmpty ||
               _lastNameController.text.isNotEmpty)) {
+        // Concatenamos nombre y apellido hasta que Firestore los guarde por separado
         final fullName =
             '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'
                 .trim();
@@ -85,8 +92,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final user = FirebaseAuth.instance.currentUser;
+    // Si no hay usuario es que está en modo invitado
     final bool isGuest = user == null;
-
     final bool isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
@@ -94,6 +101,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
+          // stretch para que el título centrado ocupe todo el ancho
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
@@ -106,6 +114,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
             ),
             const SizedBox(height: 20),
 
+            // Sección de perfil: distinto contenido según si hay sesión o no
             _buildSectionCard(
               theme,
               isDark: isDark,
@@ -113,6 +122,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
               icon: Icons.person_outline,
               children: [
                 if (isGuest) ...[
+                  // Avisamos al invitado de que no tiene sesión
                   Text(
                     "No has iniciado sesión. Regístrate para guardar tus proyectos en la nube.",
                     style: TextStyle(
@@ -121,7 +131,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     ),
                   ),
                   const SizedBox(height: 15),
-
+                  // Navegamos a login o registro según lo que elija
                   CustomRegisterButton(
                     theme: theme,
                     content: const Text("Iniciar sesión"),
@@ -135,6 +145,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                         Navigator.pushNamed(context, 'registerUser'),
                   ),
                 ] else ...[
+                  // Campos editables de nombre y apellido
                   LoginFormWidget(
                     hintText: 'Nombre',
                     icon: Icons.person_outline,
@@ -149,6 +160,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     controller: _lastNameController,
                   ),
                   const SizedBox(height: 10),
+                  // El email no se puede editar, solo se muestra
                   LoginFormWidget(
                     hintText: 'Email',
                     icon: Icons.email_outlined,
@@ -156,7 +168,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     controller: TextEditingController(text: user.email),
                   ),
                   const SizedBox(height: 15),
-
+                  // Para vincular una cuenta Google a un usuario registrado con email
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
@@ -182,6 +194,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
             const SizedBox(height: 15),
 
+            // Sección para cambiar entre modo claro, oscuro o sistema
             _buildSectionCard(
               theme,
               isDark: isDark,
@@ -241,6 +254,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
             const SizedBox(height: 15),
 
+            // El botón de cerrar sesión solo aparece si hay sesión activa
             if (!isGuest) _buildActionList(),
 
             const SizedBox(height: 30),
@@ -271,6 +285,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
+  // Guarda el tema en SharedPreferences y lo aplica 
   void _updateAppTheme(String mode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('theme', mode);
@@ -288,6 +303,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
     }
   }
 
+  // Widget reutilizable para las secciones con título, icono y contenido
   Widget _buildSectionCard(
     ThemeData theme, {
     required bool isDark,
@@ -333,6 +349,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
+  // Fondo transparente para que se vea igual en claro y oscuro
   Widget _buildActionList() {
     return Container(
       decoration: BoxDecoration(
@@ -350,6 +367,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
         ),
         onTap: () async {
           await FirebaseServices().logout();
+          // Volvemos al login tras cerrar sesión
           if (mounted) Navigator.pushReplacementNamed(context, 'login');
         },
       ),
