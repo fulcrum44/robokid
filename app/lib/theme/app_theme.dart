@@ -4,6 +4,23 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   // Colores personalizados
   static const Color robokids = Color.fromARGB(255, 16, 171, 238);
+
+  // Colores centralizados para la pantalla de ajustes (y futuras pantallas)
+  static Color cardBackground(bool isDark) =>
+      isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
+  static Color primaryText(bool isDark) =>
+      isDark ? Colors.white : Colors.black87;
+
+  static Color secondaryText(bool isDark) =>
+      isDark ? Colors.grey : Colors.black54;
+
+  static Color dividerColor(bool isDark) =>
+      isDark ? Colors.white24 : Colors.black12;
+
+  static Color inputFill(bool isDark) =>
+      isDark ? Colors.white10 : Colors.black.withAlpha(13);
+
   // TEMA CLARO
   static final ThemeData lightTheme = ThemeData.light().copyWith(
     // Color primario
@@ -35,7 +52,7 @@ class AppTheme {
       style: TextButton.styleFrom(foregroundColor: Colors.lightBlue),
     ),
     // Estilo de los textos
-    textTheme: TextTheme().copyWith(
+    textTheme: TextTheme(
       titleLarge: TextStyle(
         fontFamily: GoogleFonts.outfit().fontFamily,
         color: Colors.black,
@@ -53,13 +70,11 @@ class AppTheme {
         fontSize: 12,
       ),
     ),
-
     snackBarTheme: SnackBarThemeData(
       backgroundColor: robokids,
       contentTextStyle: TextStyle(color: Colors.white),
       behavior: SnackBarBehavior.floating,
     ),
-
     progressIndicatorTheme: ProgressIndicatorThemeData(color: robokids),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
@@ -96,7 +111,7 @@ class AppTheme {
       style: TextButton.styleFrom(foregroundColor: Colors.blue),
     ),
     // Estilo de los textos
-    textTheme: TextTheme().copyWith(
+    textTheme: TextTheme(
       titleLarge: TextStyle(
         fontFamily: GoogleFonts.outfit().fontFamily,
         color: Colors.white,

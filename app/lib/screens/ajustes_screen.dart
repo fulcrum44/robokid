@@ -15,19 +15,19 @@ class AjustesScreen extends StatefulWidget {
 
 class _AjustesScreenState extends State<AjustesScreen> {
   String _selectedTheme = 'system';
-  late TextEditingController _nameController;
+
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
 
   @override
   void initState() {
     super.initState();
-    final user = FirebaseAuth.instance.currentUser;
-    _nameController = TextEditingController(text: user?.displayName ?? '');
-
-    // Cargamos la preferencia al entrar a la pantalla
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
     _loadCurrentTheme();
+    _loadUserName();
   }
 
-  // Función para leer qué tema está guardado en la memoria del teléfono
   void _loadCurrentTheme() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -35,9 +35,21 @@ class _AjustesScreenState extends State<AjustesScreen> {
     });
   }
 
+  void _loadUserName() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user?.displayName != null) {
+      final parts = user!.displayName!.split(' ');
+      _firstNameController.text = parts.isNotEmpty ? parts.first : '';
+      _lastNameController.text = parts.length > 1
+          ? parts.sublist(1).join(' ')
+          : '';
+    }
+  }
+
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -46,8 +58,13 @@ class _AjustesScreenState extends State<AjustesScreen> {
     final theme = Theme.of(context);
 
     try {
-      if (user != null && _nameController.text.isNotEmpty) {
-        await user.updateDisplayName(_nameController.text);
+      if (user != null &&
+          (_firstNameController.text.isNotEmpty ||
+              _lastNameController.text.isNotEmpty)) {
+        final fullName =
+            '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'
+                .trim();
+        await user.updateDisplayName(fullName);
       }
 
       if (mounted) {
@@ -71,68 +88,44 @@ class _AjustesScreenState extends State<AjustesScreen> {
     final bool isGuest = user == null;
 
     final bool isDark = theme.brightness == Brightness.dark;
-    final Color cardBackground = isDark
-        ? const Color(0xFF1E1E1E)
-        : Colors.white;
-    final Color primaryTextColor = isDark ? Colors.white : Colors.black87;
-    final Color secondaryTextColor = isDark ? Colors.grey : Colors.black54;
-    final Color dividerColor = isDark ? Colors.white24 : Colors.black12;
-    final Color inputFillColor = isDark
-        ? Colors.white10
-        : Colors.black.withOpacity(0.05);
 
     return Scaffold(
       appBar: const CustomAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Configuración',
+              textAlign: TextAlign.center,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: 32,
-                color: primaryTextColor,
+                color: AppTheme.primaryText(isDark),
               ),
             ),
             const SizedBox(height: 20),
 
             _buildSectionCard(
               theme,
+              isDark: isDark,
               title: 'Perfil del Usuario',
               icon: Icons.person_outline,
-              cardColor: cardBackground,
-              textColor: primaryTextColor,
-              dividerCol: dividerColor,
               children: [
                 if (isGuest) ...[
                   Text(
                     "No has iniciado sesión. Regístrate para guardar tus proyectos en la nube.",
-                    style: TextStyle(color: secondaryTextColor, fontSize: 14),
+                    style: TextStyle(
+                      color: AppTheme.secondaryText(isDark),
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 15),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      side: BorderSide(color: dividerColor),
-                    ),
-                    icon: const Icon(
-                      Icons.g_mobiledata,
-                      color: Colors.red,
-                      size: 30,
-                    ),
-                    label: Text(
-                      'Registrarse con Google',
-                      style: TextStyle(color: primaryTextColor),
-                    ),
-                    onPressed: () => CustomSnackBar.showSnackBar(
-                      "Próximamente",
-                      context,
-                      theme,
-                    ),
+
+                  CustomRegisterButton(
+                    theme: theme,
+                    content: const Text("Iniciar sesión"),
+                    onPressed: () => Navigator.pushNamed(context, 'login'),
                   ),
                   const SizedBox(height: 10),
                   CustomRegisterButton(
@@ -146,7 +139,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     hintText: 'Nombre',
                     icon: Icons.person_outline,
                     enabled: true,
-                    controller: _nameController,
+                    controller: _firstNameController,
+                  ),
+                  const SizedBox(height: 10),
+                  LoginFormWidget(
+                    hintText: 'Apellido',
+                    icon: Icons.person_outline,
+                    enabled: true,
+                    controller: _lastNameController,
                   ),
                   const SizedBox(height: 10),
                   LoginFormWidget(
@@ -156,18 +156,19 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     controller: TextEditingController(text: user.email),
                   ),
                   const SizedBox(height: 15),
+
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      side: BorderSide(color: dividerColor),
+                      side: BorderSide(color: AppTheme.dividerColor(isDark)),
                     ),
                     icon: const Icon(Icons.link, color: Colors.blue),
                     label: Text(
-                      'Vincular otra cuenta Google',
-                      style: TextStyle(color: primaryTextColor),
+                      'Vincular con Google',
+                      style: TextStyle(color: AppTheme.primaryText(isDark)),
                     ),
                     onPressed: () => CustomSnackBar.showSnackBar(
                       "Próximamente",
@@ -183,24 +184,25 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
             _buildSectionCard(
               theme,
+              isDark: isDark,
               title: 'Apariencia',
               icon: Icons.palette_outlined,
-              cardColor: cardBackground,
-              textColor: primaryTextColor,
-              dividerCol: dividerColor,
               children: [
                 Text(
-                  "Elige cómo quieres ver la aplicación:",
-                  style: TextStyle(color: secondaryTextColor, fontSize: 13),
+                  "Elige cómo quieres ver la aplicación",
+                  style: TextStyle(
+                    color: AppTheme.secondaryText(isDark),
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
-                  value: _selectedTheme,
-                  dropdownColor: cardBackground,
-                  style: TextStyle(color: primaryTextColor),
+                  initialValue: _selectedTheme,
+                  dropdownColor: AppTheme.cardBackground(isDark),
+                  style: TextStyle(color: AppTheme.primaryText(isDark)),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: inputFillColor,
+                    fillColor: AppTheme.inputFill(isDark),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none,
@@ -211,21 +213,21 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       value: 'system',
                       child: Text(
                         "Usar ajuste del teléfono",
-                        style: TextStyle(color: primaryTextColor),
+                        style: TextStyle(color: AppTheme.primaryText(isDark)),
                       ),
                     ),
                     DropdownMenuItem(
                       value: 'light',
                       child: Text(
                         "Modo Claro",
-                        style: TextStyle(color: primaryTextColor),
+                        style: TextStyle(color: AppTheme.primaryText(isDark)),
                       ),
                     ),
                     DropdownMenuItem(
                       value: 'dark',
                       child: Text(
                         "Modo Oscuro",
-                        style: TextStyle(color: primaryTextColor),
+                        style: TextStyle(color: AppTheme.primaryText(isDark)),
                       ),
                     ),
                   ],
@@ -239,7 +241,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
             const SizedBox(height: 15),
 
-            if (!isGuest) _buildActionList(theme, cardBackground),
+            if (!isGuest) _buildActionList(),
 
             const SizedBox(height: 30),
             SizedBox(
@@ -270,7 +272,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
   }
 
   void _updateAppTheme(String mode) async {
-    // guardamos la preferencia físicamente en el teléfono
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('theme', mode);
 
@@ -278,47 +279,31 @@ class _AjustesScreenState extends State<AjustesScreen> {
     if (mode == 'light') MyApp.themeNotifier.value = ThemeMode.light;
     if (mode == 'dark') MyApp.themeNotifier.value = ThemeMode.dark;
 
-    if (mounted) {
-      final Color snackBarContentColor = (mode == 'light')
-          ? Colors.black
-          : Colors.white;
-      final Color snackBarBgColor = (mode == 'light')
-          ? Colors.white
-          : Colors.grey[900]!;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            (mode == 'system')
-                ? "Sincronizado con el sistema"
-                : "Modo $mode activado",
-            style: TextStyle(color: snackBarContentColor),
-          ),
-          backgroundColor: snackBarBgColor,
-          behavior: SnackBarBehavior.floating,
-        ),
+    if (mode == 'system' && mounted) {
+      CustomSnackBar.showSnackBar(
+        "Sincronizado con el sistema",
+        context,
+        Theme.of(context),
       );
     }
   }
 
   Widget _buildSectionCard(
     ThemeData theme, {
+    required bool isDark,
     required String title,
     required IconData icon,
     required List<Widget> children,
-    required Color cardColor,
-    required Color textColor,
-    required Color dividerCol,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: AppTheme.cardBackground(isDark),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          if (theme.brightness == Brightness.light)
+          if (!isDark)
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -336,22 +321,22 @@ class _AjustesScreenState extends State<AjustesScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
-                  color: textColor,
+                  color: AppTheme.primaryText(isDark),
                 ),
               ),
             ],
           ),
-          Divider(color: dividerCol, height: 25),
+          Divider(color: AppTheme.dividerColor(isDark), height: 25),
           ...children,
         ],
       ),
     );
   }
 
-  Widget _buildActionList(ThemeData theme, Color cardColor) {
+  Widget _buildActionList() {
     return Container(
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
       ),
       child: ListTile(
