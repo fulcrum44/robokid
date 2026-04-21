@@ -175,8 +175,8 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                         try {
                           final user = await firebaseAuth.createUser(
                             email: email,
-                            password: passwordController
-                                .text, // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
+                            password: passwordController.text, 
+                            nombre: '$name $lastName', // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
                           );
                           await insertUsuario(user!.uid, name, lastName, email);
                           await user.sendEmailVerification();
