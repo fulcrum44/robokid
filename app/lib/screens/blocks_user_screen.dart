@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/custom_appbar.dart';
 
@@ -12,14 +13,16 @@ class BlockScreen extends StatefulWidget {
 
 class _BlockScreenState extends State<BlockScreen> {
   late final WebViewController _controller;
-  bool _listo = false;
-  String? _codigo;
+  bool _listo = false; // se pone en true cuando Blockly termina de cargar
+  String? _codigo; // último código Arduino generado
+  String? _workspaceJson; // estado serializado del workspace (JSON)
 
   @override
   void initState() {
     super.initState();
 
-    // cargar el editor Blockly en el webview
+    // Configuramos el WebView para cargar el editor Blockly
+    // FlutterChannel es el puente JS -> Dart
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.white)
@@ -27,7 +30,7 @@ class _BlockScreenState extends State<BlockScreen> {
       ..loadFlutterAsset('assets/blockly_editor.html');
   }
 
-  // mensajes que llegan desde Blockly (JS -> Dart)
+  // Recibe los mensajes que manda Blockly desde JavaScript
   void _onMensaje(JavaScriptMessage mensaje) {
     final datos = jsonDecode(mensaje.message);
     final tipo = datos['type'];
@@ -38,14 +41,37 @@ class _BlockScreenState extends State<BlockScreen> {
       setState(() => _codigo = datos['data']);
       _mostrarCodigo();
     } else if (tipo == 'workspaceState') {
-      setState(() {});
+      setState(() => _workspaceJson = jsonEncode(datos['data']));
     }
   }
 
+  // Le pide a Blockly que genere el código Arduino a partir de los bloques
   void _compilar() {
     _controller.runJavaScript('requestCode()');
   }
 
+  // Pide el estado actual del workspace a Blockly (se recibe en _onMensaje)
+  void _pedirWorkspaceState() {
+    _controller.runJavaScript('requestWorkspaceState()');
+  }
+
+  // Carga un workspace guardado en el editor (recibe el JSON como string)
+  // Usamos jsonEncode para escapar caracteres especiales antes de pasarlo a JS
+  Future<void> _cargarWorkspace(String workspaceJson) async {
+    final safe = jsonEncode(workspaceJson);
+    await _controller.runJavaScript('loadWorkspace($safe)');
+  }
+
+  // Limpia todos los bloques del editor
+  Future<void> _limpiarWorkspace() async {
+    await _controller.runJavaScript('clearWorkspace()');
+    setState(() {
+      _codigo = null;
+      _workspaceJson = null;
+    });
+  }
+
+  // Muestra el código generado en un panel inferior
   void _mostrarCodigo() {
     showModalBottomSheet(
       context: context,
@@ -64,9 +90,29 @@ class _BlockScreenState extends State<BlockScreen> {
                     'Código Arduino',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.copy),
+                        tooltip: 'Copiar código',
+                        onPressed: () {
+                          if (_codigo != null) {
+                            Clipboard.setData(ClipboardData(text: _codigo!));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Código copiado'),
+                                duration: Duration(seconds: 1),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
                   ),
                 ],
               ),
