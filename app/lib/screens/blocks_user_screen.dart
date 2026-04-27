@@ -128,11 +128,7 @@ class _BlockScreenState extends State<BlockScreen> {
       });
     } else {
       // si ya existe, actualizamos
-      await updateProyecto(
-        _proyectoId!,
-        _workspaceJson!,
-        _codigo ?? '',
-      );
+      await updateProyecto(_proyectoId!, _workspaceJson!, _codigo ?? '');
     }
 
     if (mounted) {
@@ -158,9 +154,7 @@ class _BlockScreenState extends State<BlockScreen> {
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Ej: Mi robot',
-            ),
+            decoration: const InputDecoration(hintText: 'Ej: Mi robot'),
           ),
           actions: [
             TextButton(
@@ -213,6 +207,19 @@ class _BlockScreenState extends State<BlockScreen> {
                             );
                           }
                         },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.save),
+                        tooltip: 'Guardar proyecto',
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _guardar();
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.upload),
+                        tooltip: 'Compilar y subir (próximamente)',
+                        onPressed: null,
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
