@@ -1,8 +1,66 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:robokid/services/firebase_proyectos.dart';
 import 'package:robokid/widgets/widgets.dart';
 
-class RecordScreen extends StatelessWidget {
-  const RecordScreen({super.key});
+class RecordScreen extends StatefulWidget {
+  final void Function(String proyectoId)? onAbrirProyecto;
+  const RecordScreen({super.key, this.onAbrirProyecto});
+
+  @override
+  State<RecordScreen> createState() => _RecordScreenState();
+}
+
+class _RecordScreenState extends State<RecordScreen> {
+  late Future<List<Map<String, dynamic>>> _futureProyectos;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarProyectos();
+  }
+
+  void _cargarProyectos() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      _futureProyectos = getProyectosUsuario(uid);
+    } else {
+      _futureProyectos = Future.value([]);
+    }
+  }
+
+  // formatea un Timestamp de Firestore a dd/MM/yyyy
+  String _formatearFecha(dynamic timestamp) {
+    if (timestamp == null) return '';
+    final fecha = (timestamp as Timestamp).toDate();
+    return '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
+  }
+
+  Future<void> _eliminarProyecto(String id) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar proyecto'),
+        content: const Text('¿Seguro que quieres eliminar este proyecto?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      await deleteProyecto(id);
+      setState(() => _cargarProyectos());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,129 +82,92 @@ class RecordScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: ListView(
-                children: [
-                  Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: _futureProyectos,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error al cargar proyectos'));
+                  }
+
+                  final proyectos = snapshot.data ?? [];
+
+                  if (proyectos.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No hay proyectos guardados',
+                        style: theme.textTheme.bodyLarge,
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: proyectos.length,
+                    itemBuilder: (context, index) {
+                      final proyecto = proyectos[index];
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: ListTile(
+                          iconColor: theme.iconTheme.color,
+                          textColor: theme.textTheme.titleMedium?.color,
+                          title: Text(
+                            proyecto['nombre'] ?? 'Sin nombre',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text.rich(
+                            TextSpan(
+                              style: theme.textTheme.titleSmall,
                               children: [
-                                Text(
-                                  'Prueba 1',
-                                  style: theme.textTheme.titleMedium?.copyWith(
+                                TextSpan(
+                                  text: 'Creado el:',
+                                  style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text.rich(
-                                  TextSpan(
-                                    style: theme.textTheme.titleSmall,
-                                    children: [
-                                      TextSpan(
-                                        text: 'Creado el:',
-                                        style: theme.textTheme.titleSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      TextSpan(
-                                        text: ' 15/04/2006 ',
-                                        style: theme.textTheme.titleSmall,
-                                      ),
-                                    ],
-                                  ),
+                                TextSpan(
+                                  text: ' ${_formatearFecha(proyecto['creadoEn'])} ',
+                                  style: theme.textTheme.titleSmall,
                                 ),
                               ],
                             ),
                           ),
-                          Row(
+                          trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: Icon(
-                                  Icons.delete_outline,
-                                  size: 24,
-                                  color: theme.iconTheme.color,
-                                ),
-                                onPressed: () {},
+                                icon: const Icon(Icons.delete_outline, size: 24),
+                                onPressed: () => _eliminarProyecto(proyecto['id']),
                               ),
                               IconButton(
-                                icon: Icon(
-                                  Icons.cloud_download_outlined,
-                                  size: 24,
-                                  color: theme.iconTheme.color,
-                                ),
-                                onPressed: () {},
+                                icon: const Icon(Icons.cloud_download_outlined, size: 24),
+                                onPressed: () {
+                                  // abre el proyecto en el editor de bloques
+                                  if (widget.onAbrirProyecto != null) {
+                                    widget.onAbrirProyecto!(proyecto['id']);
+                                  }
+                                },
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: ListTile(
-                      iconColor: theme.iconTheme.color,
-                      textColor: theme.textTheme.titleMedium?.color,
-                      title: Text(
-                        'Prueba 2',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          onTap: () {
+                            if (widget.onAbrirProyecto != null) {
+                              widget.onAbrirProyecto!(proyecto['id']);
+                            }
+                          },
                         ),
-                      ),
-                      subtitle: Text.rich(
-                        TextSpan(
-                          style: theme.textTheme.titleSmall,
-                          children: [
-                            TextSpan(
-                              text: 'Creado el:',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextSpan(
-                              text: ' 20/04/2006 ',
-                              style: theme.textTheme.titleSmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 24),
-                            onPressed: () {},
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.cloud_download_outlined,
-                              size: 24,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],

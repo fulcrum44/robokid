@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/custom_appbar.dart';
+import 'package:robokid/services/firebase_proyectos.dart';
 
 class BlockScreen extends StatefulWidget {
-  const BlockScreen({super.key});
+  final String? proyectoId; // si viene un id, cargamos ese proyecto al abrir
+  const BlockScreen({super.key, this.proyectoId});
 
   @override
   State<BlockScreen> createState() => _BlockScreenState();
@@ -16,10 +19,14 @@ class _BlockScreenState extends State<BlockScreen> {
   bool _listo = false; // se pone en true cuando Blockly termina de cargar
   String? _codigo; // último código Arduino generado
   String? _workspaceJson; // estado serializado del workspace (JSON)
+  String? _proyectoId; // id del proyecto actual (null si es nuevo)
+  String? _nombreProyecto; // nombre del proyecto actual
+  bool _guardando = false;
 
   @override
   void initState() {
     super.initState();
+    _proyectoId = widget.proyectoId;
 
     // Configuramos el WebView para cargar el editor Blockly
     // FlutterChannel es el puente JS -> Dart
@@ -37,11 +44,20 @@ class _BlockScreenState extends State<BlockScreen> {
 
     if (tipo == 'blocklyReady') {
       setState(() => _listo = true);
+      // si venimos con un proyecto, lo cargamos ahora que Blockly esta listo
+      if (_proyectoId != null) {
+        _cargarProyectoDesdeFirestore(_proyectoId!);
+      }
     } else if (tipo == 'arduinoCode') {
       setState(() => _codigo = datos['data']);
       _mostrarCodigo();
     } else if (tipo == 'workspaceState') {
       setState(() => _workspaceJson = jsonEncode(datos['data']));
+      // si estamos en medio de un guardado, continuamos
+      if (_guardando) {
+        _guardando = false;
+        _completarGuardado();
+      }
     }
   }
 
@@ -69,6 +85,96 @@ class _BlockScreenState extends State<BlockScreen> {
       _codigo = null;
       _workspaceJson = null;
     });
+  }
+
+  // Carga un proyecto de Firestore y lo mete en el editor
+  Future<void> _cargarProyectoDesdeFirestore(String projectId) async {
+    final proyecto = await getProyecto(projectId);
+    if (proyecto != null && proyecto['workspaceJson'] != null) {
+      setState(() {
+        _nombreProyecto = proyecto['nombre'];
+        _codigo = proyecto['codigoArduino'];
+      });
+      await _cargarWorkspace(proyecto['workspaceJson']);
+    }
+  }
+
+  // Empieza el proceso de guardado: primero pide el workspace a Blockly
+  void _guardar() {
+    _guardando = true;
+    _pedirWorkspaceState();
+    // cuando llegue el workspaceState en _onMensaje, se llama a _completarGuardado
+  }
+
+  // Se ejecuta cuando ya tenemos el workspaceJson actualizado
+  Future<void> _completarGuardado() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || _workspaceJson == null) return;
+
+    // si es un proyecto nuevo, pedimos el nombre
+    if (_proyectoId == null) {
+      final nombre = await _pedirNombreProyecto();
+      if (nombre == null || nombre.isEmpty) return;
+
+      final id = await insertProyecto(
+        uid,
+        nombre,
+        _workspaceJson!,
+        _codigo ?? '',
+      );
+      setState(() {
+        _proyectoId = id;
+        _nombreProyecto = nombre;
+      });
+    } else {
+      // si ya existe, actualizamos
+      await updateProyecto(
+        _proyectoId!,
+        _workspaceJson!,
+        _codigo ?? '',
+      );
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Proyecto guardado'),
+          duration: Duration(seconds: 1),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // Dialogo para que el usuario ponga nombre al proyecto
+  Future<String?> _pedirNombreProyecto() async {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nombre del proyecto'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Ej: Mi robot',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Muestra el código generado en un panel inferior
@@ -140,10 +246,25 @@ class _BlockScreenState extends State<BlockScreen> {
     return Scaffold(
       appBar: CustomAppBar(),
       body: WebViewWidget(controller: _controller),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _listo ? _compilar : null,
-        backgroundColor: _listo ? null : Colors.grey,
-        child: const Icon(Icons.play_arrow),
+      floatingActionButton: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // boton para guardar el proyecto
+          FloatingActionButton(
+            heroTag: 'guardar',
+            onPressed: _listo ? _guardar : null,
+            backgroundColor: _listo ? null : Colors.grey,
+            child: const Icon(Icons.save),
+          ),
+          const SizedBox(width: 12),
+          // boton para compilar (generar codigo arduino)
+          FloatingActionButton(
+            heroTag: 'compilar',
+            onPressed: _listo ? _compilar : null,
+            backgroundColor: _listo ? null : Colors.grey,
+            child: const Icon(Icons.play_arrow),
+          ),
+        ],
       ),
     );
   }
