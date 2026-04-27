@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/custom_appbar.dart';
 import 'package:robokid/services/firebase_proyectos.dart';
@@ -171,6 +172,86 @@ class _BlockScreenState extends State<BlockScreen> {
     );
   }
 
+  // url del servidor de compilacion (cambiar segun donde este desplegado)
+  static const _servidorUrl = 'http://localhost:3000';
+
+  // Manda el código al servidor para compilarlo
+  Future<void> _compilarYSubir() async {
+    if (_codigo == null || _codigo!.isEmpty) return;
+
+    // mostramos que estamos compilando
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Compilando...'),
+          duration: Duration(seconds: 30),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_servidorUrl/compile'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'codigo': _codigo,
+          'placa': 'esp8266:esp8266:nodemcuv2',
+        }),
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Compilación exitosa'),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        final error = jsonDecode(response.body);
+        _mostrarErrorCompilacion(
+          error['detalle']?.toString() ?? 'Error desconocido',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No se pudo conectar al servidor: $e'),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // Muestra los errores de compilacion en un dialogo para que se lean bien
+  void _mostrarErrorCompilacion(String error) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error de compilación'),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            error,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Muestra el código generado en un panel inferior
   void _mostrarCodigo() {
     showModalBottomSheet(
@@ -218,8 +299,11 @@ class _BlockScreenState extends State<BlockScreen> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.upload),
-                        tooltip: 'Compilar y subir (próximamente)',
-                        onPressed: null,
+                        tooltip: 'Compilar y subir',
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _compilarYSubir();
+                        },
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
