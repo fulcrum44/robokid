@@ -367,8 +367,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
         ),
         onTap: () async {
           await FirebaseServices().logout();
-          // Volvemos al login tras cerrar sesión
-          if (mounted) Navigator.pushReplacementNamed(context, 'login');
+          // Volvemos al login tras cerrar sesión gracias al StreamBuilder del Wrapper
         },
       ),
     );

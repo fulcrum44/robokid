@@ -169,11 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     context,
                                     theme,
                                   );
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    'navigation',
-                                    (route) => false
-                                  );
+                                  // Aquí vendría la navegación, pero esta es gestionada por el StreamBuilder que maneja la sesión en el Wrapper
                                 }
                               } else {
                                 if (context.mounted) {
