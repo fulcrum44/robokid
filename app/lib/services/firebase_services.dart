@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-FirebaseAuth auth = FirebaseAuth.instance;
 
 class FirebaseServices {
+  static FirebaseAuth auth = FirebaseAuth.instance;
+  
   Future<User?> login({required String email, required String password}) async {
     try {
       //con esto intentamos ahcer un inicio de sesion con el autentificacion de firebase

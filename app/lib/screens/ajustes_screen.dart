@@ -45,8 +45,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
     if (user?.displayName != null) {
       final parts = user!.displayName!.split(' ');
       _firstNameController.text = parts.isNotEmpty ? parts.first : '';
-      _lastNameController.text =
-          parts.length > 1 ? parts.sublist(1).join(' ') : '';
+      _lastNameController.text = parts.length > 1
+          ? parts.sublist(1).join(' ')
+          : '';
     }
   }
 
@@ -141,8 +142,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   CustomRegisterButton(
                     theme: theme,
                     content: const Text("Registrarse"),
-                    onPressed: () =>
-                        Navigator.pushNamed(context, 'registerUser'),
+                    onPressed: () => Navigator.pushNamed(context, 'signup'),
                   ),
                 ] else ...[
                   // Campos editables de nombre y apellido
@@ -285,7 +285,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
-  // Guarda el tema en SharedPreferences y lo aplica 
+  // Guarda el tema en SharedPreferences y lo aplica
   void _updateAppTheme(String mode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('theme', mode);
@@ -367,8 +367,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
         ),
         onTap: () async {
           await FirebaseServices().logout();
-          // Volvemos al login tras cerrar sesión
-          if (mounted) Navigator.pushReplacementNamed(context, 'login');
+          // Volvemos al login tras cerrar sesión gracias al StreamBuilder del Wrapper
         },
       ),
     );
