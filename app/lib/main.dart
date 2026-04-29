@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
           title: 'RoboKids',
           // Rutas
           initialRoute: AppRoutes.initialRoute,
-          routes: AppRoutes.getAppRoutes(),
+          routes: AppRoutes.routes,
           onGenerateRoute: AppRoutes.onGenerateRoute,
            // Tema claro/oscuro
           theme: AppTheme.lightTheme,

@@ -68,8 +68,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Contenedor primario
                 Container(
                   alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.height * 0.0225),
-                  margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.0225),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.height * 0.0225,
+                  ),
+                  margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.0225,
+                  ),
                   width: MediaQuery.of(context).size.width * 0.825,
                   height: MediaQuery.of(context).size.height * 0.5625,
                   decoration: BoxDecoration(
@@ -79,7 +83,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Column(
                     children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.0225),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
 
                       Text('Iniciar sesión', style: theme.textTheme.titleLarge),
 
@@ -93,7 +99,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         enabled: !buttonIsLoading,
                       ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.0175),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0175,
+                      ),
 
                       // Contraseña
                       LoginFormWidget(
@@ -115,110 +123,113 @@ class _LoginScreenState extends State<LoginScreen> {
                         enabled: !buttonIsLoading,
                       ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.0225),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
 
                       // Botón de iniciar sesión
                       CustomRegisterButton(
                         theme: theme,
                         content: buttonIsLoading
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: containerBorder,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'Iniciar sesión',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: containerBorder,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Iniciar sesión',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
                         onPressed: buttonIsLoading
-                        ? null
-                        : () async {
-                            // Quitamos el focus del botón
-                            FocusScope.of(context).unfocus();
-                            // Comprobamos si el login está vacío
-                            if (emailController.text.trim().isEmpty ||
-                                passwordController.text.trim().isEmpty) {
-                              CustomSnackBar.showSnackBar(
-                                'Debe introducir correo y contraseña',
-                                context,
-                                theme,
-                              );
-                              return;
-                            }
-                            final String email = emailController.text
-                                .trim();
-                            final String password = passwordController.text;
+                            ? null
+                            : () async {
+                                // Quitamos el focus del botón
+                                FocusScope.of(context).unfocus();
+                                // Comprobamos si el login está vacío
+                                if (emailController.text.trim().isEmpty ||
+                                    passwordController.text.trim().isEmpty) {
+                                  CustomSnackBar.showSnackBar(
+                                    'Debe introducir correo y contraseña',
+                                    context,
+                                    theme,
+                                  );
+                                  return;
+                                }
+                                final String email = emailController.text
+                                    .trim();
+                                final String password = passwordController.text;
 
-                            setState(() => buttonIsLoading = true);
+                                setState(() => buttonIsLoading = true);
 
-                            try {
-                              //le decimos qie espero a ver si devuelve datos antes de poner el snabar y de qe te lleve a la pantalla
-                              final usuario = await firebaseServices.login(
-                                email: email,
-                                password: password,
-                              );
-                              if (usuario != null) {
-                                if (context.mounted) {
-                                  CustomSnackBar.showSnackBar(
-                                    '¡Bienvenido !',
-                                    context,
-                                    theme,
+                                try {
+                                  //le decimos qie espero a ver si devuelve datos antes de poner el snabar y de qe te lleve a la pantalla
+                                  final usuario = await firebaseServices.login(
+                                    email: email,
+                                    password: password,
                                   );
-                                  // Aquí vendría la navegación, pero esta es gestionada por el StreamBuilder que maneja la sesión en el Wrapper
+                                  if (usuario != null) {
+                                    if (context.mounted) {
+                                      CustomSnackBar.showSnackBar(
+                                        '¡Bienvenido !',
+                                        context,
+                                        theme,
+                                      );
+                                      // Aquí vendría la navegación, pero esta es gestionada por el StreamBuilder que maneja la sesión en el Wrapper
+                                    }
+                                  } else {
+                                    if (context.mounted) {
+                                      CustomSnackBar.showSnackBar(
+                                        'Correo o contraseña incorrectos',
+                                        context,
+                                        theme,
+                                      );
+                                    }
+                                  }
+                                } on FirebaseAuthException catch (e) {
+                                  //Si hay un error porque no encontro al usuario; no salta el siguiente print
+                                  if (e.message!.contains(
+                                    'credential is incorrect',
+                                  )) {
+                                    if (context.mounted) {
+                                      CustomSnackBar.showSnackBar(
+                                        'Usuario no encontrado o credenciales incorrectas',
+                                        context,
+                                        theme,
+                                      );
+                                    }
+                                  } else {
+                                    if (context.mounted) {
+                                      CustomSnackBar.showSnackBar(
+                                        'Error en la conexion a Firebase',
+                                        context,
+                                        theme,
+                                      );
+                                    }
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    CustomSnackBar.showSnackBar(
+                                      'Error al iniciar sesión',
+                                      context,
+                                      theme,
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => buttonIsLoading = false);
+                                  }
                                 }
-                              } else {
-                                if (context.mounted) {
-                                  CustomSnackBar.showSnackBar(
-                                    'Correo o contraseña incorrectos',
-                                    context,
-                                    theme,
-                                  );
-                                }
-                              }
-                            } on FirebaseAuthException catch (e) {
-                              //Si hay un error porque no encontro al usuario; no salta el siguiente print
-                              if (e.message!.contains(
-                                'credential is incorrect',
-                              )) {
-                                if (context.mounted) {
-                                  CustomSnackBar.showSnackBar(
-                                    'Usuario no encontrado o credenciales incorrectas',
-                                    context,
-                                    theme,
-                                  );
-                                }
-                              
-                              } else {
-                                if (context.mounted) {
-                                  CustomSnackBar.showSnackBar(
-                                    'Error en la conexion a Firebase',
-                                    context,
-                                    theme,
-                                  );
-                                }
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                CustomSnackBar.showSnackBar(
-                                  'Error al iniciar sesión',
-                                  context,
-                                  theme,
-                                );
-                              }
-                            } finally {
-                              if (mounted) {
-                                setState(() => buttonIsLoading = false);
-                              }
-                            }
-                          },
+                              },
                       ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.0225),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
 
                       Text(
                         'O',
@@ -227,7 +238,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.0225),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
 
                       OutlinedButton(
                         onPressed: () {
@@ -239,8 +252,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.0225),
-
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
                     ],
                   ),
                 ),
@@ -250,7 +264,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Contenedor secundario
                 Container(
                   alignment: Alignment.center,
-                  margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.01075),
+                  margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.01075,
+                  ),
                   width: MediaQuery.of(context).size.width * 0.825,
                   height: MediaQuery.of(context).size.height * 0.125,
                   decoration: BoxDecoration(
@@ -261,7 +277,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   child: Column(
                     children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.0225),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
                       Text(
                         '¿Aún no tienes una cuenta?',
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -271,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Botón de registro
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, 'registerUser');
+                          Navigator.pushNamed(context, 'signup');
                         },
                         child: Text(
                           'Regístrate ahora',

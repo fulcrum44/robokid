@@ -4,63 +4,22 @@ import 'package:robokid/screens/screens.dart';
 
 class AppRoutes {
   // Ruta inicial
-  static const initialRoute = 'login';
+  static const initialRoute = 'wrapper';
 
-  // Mapa de rutas
-  static final menuOptions = <MenuOption>[
-    MenuOption(
-      route: 'login',
-      name: 'LoginScreen',
-      screen: const LoginScreen(),
-    ),
-    MenuOption(
-      route: 'registerUser',
-      name: 'RegisterUser',
-      screen: const RegisterScreen(),
-    ),
-    MenuOption(
-      route: 'blocksScreen',
-      name: 'BlocksScreenUser',
-      screen: const BlockScreen(),
-    ),
-     MenuOption(
-      route: 'record',
-      name: 'Record',
-      screen: const RecordScreen(),
-    ),
-     MenuOption(
-      route: 'navigation',
-      name: 'Navegation',
-      screen: const NavegationScreen(),
-    ),
-    
-  ];
-
-  // Método para mapear la lista de rutas
-  static Map<String, Widget Function(BuildContext)> getAppRoutes() {
-    Map<String, Widget Function(BuildContext)> appRoutes = {};
-
-    for (final option in menuOptions) {
-      appRoutes.addAll({option.route: (BuildContext context) => option.screen});
-    }
-
-    return appRoutes;
-  }
+  static Map<String, Widget Function(BuildContext)> routes = {
+    'wrapper': (BuildContext context) => const Wrapper(),
+    'navigation': (BuildContext context) => const NavegationScreen(),
+    'login': (BuildContext context) => const LoginScreen(),
+    'signup': (BuildContext context) => const RegisterScreen(),
+    'blocksScreen': (BuildContext context) => const BlockScreen(),
+    'record': (BuildContext context) => const RecordScreen(),
+    'config': (BuildContext context) => const AjustesScreen()
+  };
+  
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     return MaterialPageRoute(
       builder: (context) => LoginScreen(),
     ); //con esto si llamo a una pagina qie no existe
     //te lleva a la de login
   } 
-}
-class MenuOption {
-  final String route;
-  final String name;
-  final Widget screen;
-
-  MenuOption({
-    required this.route, 
-    required this.name, 
-    required this.screen
-  });
 }
