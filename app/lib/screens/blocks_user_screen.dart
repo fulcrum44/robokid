@@ -38,6 +38,18 @@ class _BlockScreenState extends State<BlockScreen> {
       ..loadFlutterAsset('assets/blockly_editor.html');
   }
 
+  @override
+  void didUpdateWidget(covariant BlockScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // si el proyectoId cambió y Blockly ya está listo, cargamos el proyecto
+    if (widget.proyectoId != null &&
+        widget.proyectoId != oldWidget.proyectoId &&
+        _listo) {
+      _proyectoId = widget.proyectoId;
+      _cargarProyectoDesdeFirestore(_proyectoId!);
+    }
+  }
+
   // Recibe los mensajes que manda Blockly desde JavaScript
   void _onMensaje(JavaScriptMessage mensaje) {
     final datos = jsonDecode(mensaje.message);
