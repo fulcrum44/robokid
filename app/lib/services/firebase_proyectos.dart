@@ -79,3 +79,11 @@ Future<void> updateProyecto(
 Future<void> deleteProyecto(String projectId) async {
   await db.collection("Proyectos").doc(projectId).delete();
 }
+
+// renombra un proyecto
+Future<void> renombrarProyecto(String projectId, String nuevoNombre) async {
+  await db.collection("Proyectos").doc(projectId).update({
+    "nombre": nuevoNombre,
+    "actualizadoEn": Timestamp.now(),
+  });
+}

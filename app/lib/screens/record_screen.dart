@@ -37,6 +37,89 @@ class _RecordScreenState extends State<RecordScreen> {
     return '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
   }
 
+  void _mostrarDetallesProyecto(Map<String, dynamic> proyecto) {
+    final theme = Theme.of(context);
+    final nombreController = TextEditingController(
+      text: proyecto['nombre'] ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          proyecto['nombre'] ?? 'Sin nombre',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Creado el: ',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: _formatearFecha(proyecto['creadoEn']),
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Última modificación: ',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: _formatearFecha(proyecto['actualizadoEn']),
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nombreController,
+              decoration: const InputDecoration(
+                labelText: 'Nombre del proyecto',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final nuevoNombre = nombreController.text.trim();
+              if (nuevoNombre.isNotEmpty && nuevoNombre != proyecto['nombre']) {
+                await renombrarProyecto(proyecto['id'], nuevoNombre);
+                setState(() => _cargarProyectos());
+              }
+              if (context.mounted) Navigator.pop(context);
+            },
+            child: const Text('Guardar nombre'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _eliminarProyecto(String id) async {
     final confirmar = await showDialog<bool>(
       context: context,
@@ -134,7 +217,8 @@ class _RecordScreenState extends State<RecordScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: ' ${_formatearFecha(proyecto['creadoEn'])} ',
+                                  text:
+                                      ' ${_formatearFecha(proyecto['creadoEn'])} ',
                                   style: theme.textTheme.titleSmall,
                                 ),
                               ],
@@ -144,11 +228,18 @@ class _RecordScreenState extends State<RecordScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 24),
-                                onPressed: () => _eliminarProyecto(proyecto['id']),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 24,
+                                ),
+                                onPressed: () =>
+                                    _eliminarProyecto(proyecto['id']),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.cloud_download_outlined, size: 24),
+                                icon: const Icon(
+                                  Icons.cloud_download_outlined,
+                                  size: 24,
+                                ),
                                 onPressed: () {
                                   // abre el proyecto en el editor de bloques
                                   if (widget.onAbrirProyecto != null) {
@@ -158,11 +249,7 @@ class _RecordScreenState extends State<RecordScreen> {
                               ),
                             ],
                           ),
-                          onTap: () {
-                            if (widget.onAbrirProyecto != null) {
-                              widget.onAbrirProyecto!(proyecto['id']);
-                            }
-                          },
+                          onTap: () => _mostrarDetallesProyecto(proyecto),
                         ),
                       );
                     },
