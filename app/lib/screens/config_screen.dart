@@ -6,14 +6,14 @@ import 'package:robokid/services/firebase_services.dart';
 import 'package:robokid/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AjustesScreen extends StatefulWidget {
-  const AjustesScreen({super.key});
+class ConfigScreen extends StatefulWidget {
+  const ConfigScreen({super.key});
 
   @override
-  State<AjustesScreen> createState() => _AjustesScreenState();
+  State<ConfigScreen> createState() => _ConfigScreenState();
 }
 
-class _AjustesScreenState extends State<AjustesScreen> {
+class _ConfigScreenState extends State<ConfigScreen> {
   // Tema seleccionado, por defecto sigue el sistema
   String _selectedTheme = 'system';
 

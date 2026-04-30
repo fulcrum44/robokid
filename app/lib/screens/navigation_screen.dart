@@ -46,7 +46,7 @@ class _NavegationScreenState extends State<NavegationScreen> {
     final screens = <Widget>[
       BlockScreen(proyectoId: _proyectoId),
       RecordScreen(key: _recordKey, onAbrirProyecto: _abrirProyecto),
-      const AjustesScreen(),
+      const ConfigScreen(),
     ];
 
     return Scaffold(
