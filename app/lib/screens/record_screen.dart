@@ -9,16 +9,21 @@ class RecordScreen extends StatefulWidget {
   const RecordScreen({super.key, this.onAbrirProyecto});
 
   @override
-  State<RecordScreen> createState() => _RecordScreenState();
+  State<RecordScreen> createState() => RecordScreenState();
 }
 
-class _RecordScreenState extends State<RecordScreen> {
+class RecordScreenState extends State<RecordScreen> {
   late Future<List<Map<String, dynamic>>> _futureProyectos;
 
   @override
   void initState() {
     super.initState();
     _cargarProyectos();
+  }
+
+  /// Recarga la lista de proyectos (puede llamarse desde fuera con una GlobalKey)
+  void recargar() {
+    setState(() => _cargarProyectos());
   }
 
   void _cargarProyectos() {

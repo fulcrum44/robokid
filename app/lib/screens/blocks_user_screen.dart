@@ -65,7 +65,7 @@ class _BlockScreenState extends State<BlockScreen> {
       setState(() => _codigo = datos['data']);
       _mostrarCodigo();
     } else if (tipo == 'workspaceState') {
-      setState(() => _workspaceJson = jsonEncode(datos['data']));
+      setState(() => _workspaceJson = datos['data']);
       // si estamos en medio de un guardado, continuamos
       if (_guardando) {
         _guardando = false;
@@ -140,8 +140,50 @@ class _BlockScreenState extends State<BlockScreen> {
         _nombreProyecto = nombre;
       });
     } else {
-      // si ya existe, actualizamos
-      await updateProyecto(_proyectoId!, _workspaceJson!, _codigo ?? '');
+      // si ya existe, preguntamos si sobreescribir o crear uno nuevo
+      final opcion = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Guardar proyecto'),
+          content: Text(
+            '¿Quieres sobreescribir "$_nombreProyecto" o guardarlo como un nuevo proyecto?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'nuevo'),
+              child: const Text('Nuevo proyecto'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, 'sobreescribir'),
+              child: const Text('Sobreescribir'),
+            ),
+          ],
+        ),
+      );
+
+      if (opcion == null) return;
+
+      if (opcion == 'sobreescribir') {
+        await updateProyecto(_proyectoId!, _workspaceJson!, _codigo ?? '');
+      } else {
+        final nombre = await _pedirNombreProyecto();
+        if (nombre == null || nombre.isEmpty) return;
+
+        final id = await insertProyecto(
+          uid,
+          nombre,
+          _workspaceJson!,
+          _codigo ?? '',
+        );
+        setState(() {
+          _proyectoId = id;
+          _nombreProyecto = nombre;
+        });
+      }
     }
 
     if (mounted) {
@@ -348,24 +390,39 @@ class _BlockScreenState extends State<BlockScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(),
-      body: WebViewWidget(controller: _controller),
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
+      body: Column(
         children: [
-          // boton para guardar el proyecto
-          FloatingActionButton(
-            heroTag: 'guardar',
-            onPressed: _listo ? _guardar : null,
-            backgroundColor: _listo ? null : Colors.grey,
-            child: const Icon(Icons.save),
-          ),
-          const SizedBox(width: 12),
-          // boton para compilar (generar codigo arduino)
-          FloatingActionButton(
-            heroTag: 'compilar',
-            onPressed: _listo ? _compilar : null,
-            backgroundColor: _listo ? null : Colors.grey,
-            child: const Icon(Icons.play_arrow),
+          Expanded(child: WebViewWidget(controller: _controller)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // boton para limpiar el workspace
+                FloatingActionButton(
+                  heroTag: 'limpiar',
+                  onPressed: _listo ? _limpiarWorkspace : null,
+                  backgroundColor: _listo ? null : Colors.grey,
+                  child: const Icon(Icons.delete_outline),
+                ),
+                const SizedBox(width: 12),
+                // boton para guardar el proyecto
+                FloatingActionButton(
+                  heroTag: 'guardar',
+                  onPressed: _listo ? _guardar : null,
+                  backgroundColor: _listo ? null : Colors.grey,
+                  child: const Icon(Icons.save),
+                ),
+                const SizedBox(width: 12),
+                // boton para compilar (generar codigo arduino)
+                FloatingActionButton(
+                  heroTag: 'compilar',
+                  onPressed: _listo ? _compilar : null,
+                  backgroundColor: _listo ? null : Colors.grey,
+                  child: const Icon(Icons.play_arrow),
+                ),
+              ],
+            ),
           ),
         ],
       ),
