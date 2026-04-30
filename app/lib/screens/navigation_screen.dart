@@ -10,10 +10,26 @@ class NavegationScreen extends StatefulWidget {
 
 class _NavegationScreenState extends State<NavegationScreen> {
   int _selectedIndex = 0;
+  String? _proyectoId; // id del proyecto que se va a abrir en BlockScreen
+  final _recordKey = GlobalKey<RecordScreenState>();
 
-  final List<Widget> _screens = const [BlockScreen(), RecordScreen(), AjustesScreen()];
+  // cuando el usuario toca un proyecto en el historial, cambiamos a la tab de bloques
+  void _abrirProyecto(String proyectoId) {
+    setState(() {
+      _proyectoId = proyectoId;
+      _selectedIndex = 0; // vamos a la tab de bloques
+    });
+  }
 
   void _onItemTapped(int index) {
+    // si cambiamos de tab manualmente, limpiamos el proyecto para no recargarlo
+    if (index != 0) {
+      _proyectoId = null;
+    }
+    // si vamos al historial, recargamos los proyectos
+    if (index == 1) {
+      _recordKey.currentState?.recargar();
+    }
     setState(() {
       _selectedIndex = index;
     });
@@ -26,8 +42,15 @@ class _NavegationScreenState extends State<NavegationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // no usamos const porque BlockScreen cambia segun el proyecto
+    final screens = <Widget>[
+      BlockScreen(proyectoId: _proyectoId),
+      RecordScreen(key: _recordKey, onAbrirProyecto: _abrirProyecto),
+      const AjustesScreen(),
+    ];
+
     return Scaffold(
-     body: IndexedStack( index: _selectedIndex, children: _screens, ),
+      body: IndexedStack(index: _selectedIndex, children: screens),
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
