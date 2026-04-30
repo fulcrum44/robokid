@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-FirebaseFirestore db = FirebaseFirestore.instance;
+FirebaseFirestore usersDB = FirebaseFirestore.instance;
 
 Future<List> getIUser() async {
   List user = [];
 
-  CollectionReference collectionReferenceUser = db.collection(
+  CollectionReference collectionReferenceUser = usersDB.collection(
     'Usuarios',
   );
 
@@ -31,7 +31,7 @@ Future<void> insertUsuario(
   String? email,
   String? lastName,
 ) async {
-  await db.collection("Usuarios").doc(uid).set({
+  await usersDB.collection("Usuarios").doc(uid).set({
     "name": name,
     "last_name": lastName,
     "email": email,
@@ -44,7 +44,7 @@ Future<void> updateUser(
   String? newEmail,
   String? newLastName,
 ) async {
-  await db.collection("Usuarios").doc(uid).set({
+  await usersDB.collection("Usuarios").doc(uid).set({
     "name": newName,
     "last_name": newLastName,
     "email": newEmail,
@@ -52,5 +52,5 @@ Future<void> updateUser(
 }
 
   Future<void> deleteUser(String uid) async {
-  await db.collection("Usuarios").doc(uid).delete();
+  await usersDB.collection("Usuarios").doc(uid).delete();
 }
