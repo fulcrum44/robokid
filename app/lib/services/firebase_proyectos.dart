@@ -22,7 +22,7 @@ Future<String> insertProyecto(
 }
 
 // trae todos los proyectos de un usuario ordenados por fecha
-Future<List<Map<String, dynamic>>> getProyectosUsuario(String userId) async {
+Future<List<Map<String, dynamic>>> getUserProjects(String userId) async {
   List<Map<String, dynamic>> proyectos = [];
 
   QuerySnapshot query = await projectsDB
@@ -81,7 +81,7 @@ Future<void> deleteProyecto(String projectId) async {
 }
 
 // renombra un proyecto
-Future<void> renombrarProyecto(String projectId, String nuevoNombre) async {
+Future<void> projectRename(String projectId, String nuevoNombre) async {
   await projectsDB.collection("Proyectos").doc(projectId).update({
     "nombre": nuevoNombre,
     "actualizadoEn": Timestamp.now(),

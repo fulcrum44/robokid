@@ -10,13 +10,13 @@ class NavegationScreen extends StatefulWidget {
 
 class _NavegationScreenState extends State<NavegationScreen> {
   int _selectedIndex = 0;
-  String? _proyectoId; // id del proyecto que se va a abrir en BlockScreen
+  String? _projectId; // id del proyecto que se va a abrir en BlockScreen
   final _recordKey = GlobalKey<RecordScreenState>();
 
   // cuando el usuario toca un proyecto en el historial, cambiamos a la tab de bloques
-  void _abrirProyecto(String proyectoId) {
+  void _openProject(String proyectoId) {
     setState(() {
-      _proyectoId = proyectoId;
+      _projectId = proyectoId;
       _selectedIndex = 0; // vamos a la tab de bloques
     });
   }
@@ -24,11 +24,11 @@ class _NavegationScreenState extends State<NavegationScreen> {
   void _onItemTapped(int index) {
     // si cambiamos de tab manualmente, limpiamos el proyecto para no recargarlo
     if (index != 0) {
-      _proyectoId = null;
+      _projectId = null;
     }
     // si vamos al historial, recargamos los proyectos
     if (index == 1) {
-      _recordKey.currentState?.recargar();
+      _recordKey.currentState?.reload();
     }
     setState(() {
       _selectedIndex = index;
@@ -44,8 +44,8 @@ class _NavegationScreenState extends State<NavegationScreen> {
   Widget build(BuildContext context) {
     // no usamos const porque BlockScreen cambia segun el proyecto
     final screens = <Widget>[
-      BlockScreen(proyectoId: _proyectoId),
-      RecordScreen(key: _recordKey, onAbrirProyecto: _abrirProyecto),
+      BlockScreen(proyectoId: _projectId),
+      RecordScreen(key: _recordKey, onOpenProject: _openProject),
       const ConfigScreen(),
     ];
 
