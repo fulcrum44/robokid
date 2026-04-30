@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // Booleano para el icono para ver la contraseña
   bool obscureText = true;
   // BORRAR ?
-  bool mostrarBotones = false;
+  bool showButtons = false;
 
   @override
   void initState() {
@@ -168,11 +168,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                 try {
                                   //le decimos qie espero a ver si devuelve datos antes de poner el snabar y de qe te lleve a la pantalla
-                                  final usuario = await firebaseServices.login(
+                                  final user = await firebaseServices.login(
                                     email: email,
                                     password: password,
                                   );
-                                  if (usuario != null) {
+                                  if (user != null) {
                                     if (context.mounted) {
                                       CustomSnackBar.showSnackBar(
                                         '¡Bienvenido !',
