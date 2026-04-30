@@ -1,6 +1,6 @@
 import { arduinoGenerator } from './arduino_generator.js';
 
-arduinoGenerator['esperar_segundos'] = function(block) {
+arduinoGenerator.forBlock['esperar_segundos'] = function(block) {
   const segundos = block.getFieldValue('SEGUNDOS');
 
   // convertimos a milisegundos porque nativamente el delay() de arduino trabaja con milisegundos
