@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
-import 'package:robokid/services/firebase_services.dart';
+import 'package:robokid/services/services.dart';
 import 'package:robokid/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:robokid/widgets/custom_appbar.dart';
-import 'package:robokid/services/firebase_proyectos.dart';
+import 'package:robokid/widgets/widgets.dart';
+import 'package:robokid/services/services.dart';
 
 class BlockScreen extends StatefulWidget {
   final String? proyectoId; // si viene un id, cargamos ese proyecto al abrir

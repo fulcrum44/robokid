@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:robokid/services/firebase_proyectos.dart';
+import 'package:robokid/services/services.dart';
 import 'package:robokid/widgets/widgets.dart';
 
 class RecordScreen extends StatefulWidget {
