@@ -1,58 +1,56 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:robokid/services/firebase_proyectos.dart';
+import 'package:robokid/services/services.dart';
 import 'package:robokid/widgets/widgets.dart';
 
 class RecordScreen extends StatefulWidget {
-  final void Function(String proyectoId)? onAbrirProyecto;
-  const RecordScreen({super.key, this.onAbrirProyecto});
+  final void Function(String proyectoId)? onOpenProject;
+  const RecordScreen({super.key, this.onOpenProject});
 
   @override
   State<RecordScreen> createState() => RecordScreenState();
 }
 
 class RecordScreenState extends State<RecordScreen> {
-  late Future<List<Map<String, dynamic>>> _futureProyectos;
+  late Future<List<Map<String, dynamic>>> _futureProjects;
 
   @override
   void initState() {
     super.initState();
-    _cargarProyectos();
+    _loadProjects();
   }
 
   /// Recarga la lista de proyectos (puede llamarse desde fuera con una GlobalKey)
-  void recargar() {
-    setState(() => _cargarProyectos());
+  void reload() {
+    setState(() => _loadProjects());
   }
 
-  void _cargarProyectos() {
+  void _loadProjects() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
-      _futureProyectos = getProyectosUsuario(uid);
+      _futureProjects = getUserProjects(uid);
     } else {
-      _futureProyectos = Future.value([]);
+      _futureProjects = Future.value([]);
     }
   }
 
   // formatea un Timestamp de Firestore a dd/MM/yyyy
-  String _formatearFecha(dynamic timestamp) {
+  String _formatDate(dynamic timestamp) {
     if (timestamp == null) return '';
-    final fecha = (timestamp as Timestamp).toDate();
-    return '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
+    final date = (timestamp as Timestamp).toDate();
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  void _mostrarDetallesProyecto(Map<String, dynamic> proyecto) {
+  void _showProjectDetails(Map<String, dynamic> project) {
     final theme = Theme.of(context);
-    final nombreController = TextEditingController(
-      text: proyecto['nombre'] ?? '',
-    );
+    final nameController = TextEditingController(text: project['nombre'] ?? '');
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          proyecto['nombre'] ?? 'Sin nombre',
+          project['nombre'] ?? 'Sin nombre',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -71,7 +69,7 @@ class RecordScreenState extends State<RecordScreen> {
                     ),
                   ),
                   TextSpan(
-                    text: _formatearFecha(proyecto['creadoEn']),
+                    text: _formatDate(project['creadoEn']),
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],
@@ -88,7 +86,7 @@ class RecordScreenState extends State<RecordScreen> {
                     ),
                   ),
                   TextSpan(
-                    text: _formatearFecha(proyecto['actualizadoEn']),
+                    text: _formatDate(project['actualizadoEn']),
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],
@@ -96,7 +94,7 @@ class RecordScreenState extends State<RecordScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: nombreController,
+              controller: nameController,
               decoration: const InputDecoration(
                 labelText: 'Nombre del proyecto',
                 border: OutlineInputBorder(),
@@ -111,10 +109,10 @@ class RecordScreenState extends State<RecordScreen> {
           ),
           FilledButton(
             onPressed: () async {
-              final nuevoNombre = nombreController.text.trim();
-              if (nuevoNombre.isNotEmpty && nuevoNombre != proyecto['nombre']) {
-                await renombrarProyecto(proyecto['id'], nuevoNombre);
-                setState(() => _cargarProyectos());
+              final newName = nameController.text.trim();
+              if (newName.isNotEmpty && newName != project['nombre']) {
+                await projectRename(project['id'], newName);
+                setState(() => _loadProjects());
               }
               if (context.mounted) Navigator.pop(context);
             },
@@ -125,7 +123,7 @@ class RecordScreenState extends State<RecordScreen> {
     );
   }
 
-  Future<void> _eliminarProyecto(String id) async {
+  Future<void> _deleteProject(String id) async {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -146,7 +144,7 @@ class RecordScreenState extends State<RecordScreen> {
 
     if (confirmar == true) {
       await deleteProyecto(id);
-      setState(() => _cargarProyectos());
+      setState(() => _loadProjects());
     }
   }
 
@@ -171,7 +169,7 @@ class RecordScreenState extends State<RecordScreen> {
             const SizedBox(height: 10),
             Expanded(
               child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: _futureProyectos,
+                future: _futureProjects,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -181,9 +179,9 @@ class RecordScreenState extends State<RecordScreen> {
                     return Center(child: Text('Error al cargar proyectos'));
                   }
 
-                  final proyectos = snapshot.data ?? [];
+                  final projects = snapshot.data ?? [];
 
-                  if (proyectos.isEmpty) {
+                  if (projects.isEmpty) {
                     return Center(
                       child: Text(
                         'No hay proyectos guardados',
@@ -193,9 +191,9 @@ class RecordScreenState extends State<RecordScreen> {
                   }
 
                   return ListView.builder(
-                    itemCount: proyectos.length,
+                    itemCount: projects.length,
                     itemBuilder: (context, index) {
-                      final proyecto = proyectos[index];
+                      final project = projects[index];
 
                       return Card(
                         margin: const EdgeInsets.symmetric(
@@ -206,7 +204,7 @@ class RecordScreenState extends State<RecordScreen> {
                           iconColor: theme.iconTheme.color,
                           textColor: theme.textTheme.titleMedium?.color,
                           title: Text(
-                            proyecto['nombre'] ?? 'Sin nombre',
+                            project['nombre'] ?? 'Sin nombre',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -223,7 +221,7 @@ class RecordScreenState extends State<RecordScreen> {
                                 ),
                                 TextSpan(
                                   text:
-                                      ' ${_formatearFecha(proyecto['creadoEn'])} ',
+                                      ' ${_formatDate(project['creadoEn'])} ',
                                   style: theme.textTheme.titleSmall,
                                 ),
                               ],
@@ -238,7 +236,7 @@ class RecordScreenState extends State<RecordScreen> {
                                   size: 24,
                                 ),
                                 onPressed: () =>
-                                    _eliminarProyecto(proyecto['id']),
+                                    _deleteProject(project['id']),
                               ),
                               IconButton(
                                 icon: const Icon(
@@ -247,14 +245,14 @@ class RecordScreenState extends State<RecordScreen> {
                                 ),
                                 onPressed: () {
                                   // abre el proyecto en el editor de bloques
-                                  if (widget.onAbrirProyecto != null) {
-                                    widget.onAbrirProyecto!(proyecto['id']);
+                                  if (widget.onOpenProject != null) {
+                                    widget.onOpenProject!(project['id']);
                                   }
                                 },
                               ),
                             ],
                           ),
-                          onTap: () => _mostrarDetallesProyecto(proyecto),
+                          onTap: () => _showProjectDetails(project),
                         ),
                       );
                     },

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-FirebaseFirestore db = FirebaseFirestore.instance;
+FirebaseFirestore projectsDB = FirebaseFirestore.instance;
 
 // guarda un proyecto nuevo en Firestore y devuelve el id que se genera
 Future<String> insertProyecto(
@@ -9,7 +9,7 @@ Future<String> insertProyecto(
   String workspaceJson,
   String codigoArduino,
 ) async {
-  final doc = await db.collection("Proyectos").add({
+  final doc = await projectsDB.collection("Proyectos").add({
     "userId": userId,
     "nombre": nombre,
     "workspaceJson": workspaceJson,
@@ -22,10 +22,10 @@ Future<String> insertProyecto(
 }
 
 // trae todos los proyectos de un usuario ordenados por fecha
-Future<List<Map<String, dynamic>>> getProyectosUsuario(String userId) async {
+Future<List<Map<String, dynamic>>> getUserProjects(String userId) async {
   List<Map<String, dynamic>> proyectos = [];
 
-  QuerySnapshot query = await db
+  QuerySnapshot query = await projectsDB
       .collection("Proyectos")
       .where("userId", isEqualTo: userId)
       .orderBy("actualizadoEn", descending: true)
@@ -48,7 +48,7 @@ Future<List<Map<String, dynamic>>> getProyectosUsuario(String userId) async {
 
 // trae un proyecto por su id
 Future<Map<String, dynamic>?> getProyecto(String projectId) async {
-  final doc = await db.collection("Proyectos").doc(projectId).get();
+  final doc = await projectsDB.collection("Proyectos").doc(projectId).get();
 
   if (!doc.exists) return null;
 
@@ -69,7 +69,7 @@ Future<void> updateProyecto(
   String workspaceJson,
   String codigoArduino,
 ) async {
-  await db.collection("Proyectos").doc(projectId).update({
+  await projectsDB.collection("Proyectos").doc(projectId).update({
     "workspaceJson": workspaceJson,
     "codigoArduino": codigoArduino,
     "actualizadoEn": Timestamp.now(),
@@ -77,12 +77,12 @@ Future<void> updateProyecto(
 }
 
 Future<void> deleteProyecto(String projectId) async {
-  await db.collection("Proyectos").doc(projectId).delete();
+  await projectsDB.collection("Proyectos").doc(projectId).delete();
 }
 
 // renombra un proyecto
-Future<void> renombrarProyecto(String projectId, String nuevoNombre) async {
-  await db.collection("Proyectos").doc(projectId).update({
+Future<void> projectRename(String projectId, String nuevoNombre) async {
+  await projectsDB.collection("Proyectos").doc(projectId).update({
     "nombre": nuevoNombre,
     "actualizadoEn": Timestamp.now(),
   });

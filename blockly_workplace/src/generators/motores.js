@@ -1,6 +1,6 @@
 import { arduinoGenerator } from './arduino_generator.js';
 
-arduinoGenerator['mover_motores'] = function(block) {
+arduinoGenerator.forBlock['mover_motores'] = function(block) {
   const direccion = block.getFieldValue('DIRECCION');
 
   // Includes y objetos globales (solo se añaden una vez)
@@ -30,7 +30,7 @@ arduinoGenerator['mover_motores'] = function(block) {
   return code;
 };
 
-arduinoGenerator['mover_motor_grados'] = function(block) {
+arduinoGenerator.forBlock['mover_motor_grados'] = function(block) {
   const angulo = block.getFieldValue('ANGULO');
 
   // include y variable global
@@ -43,7 +43,7 @@ arduinoGenerator['mover_motor_grados'] = function(block) {
   return code;
 };
 
-arduinoGenerator['cambiar_velocidad'] = function(block) {
+arduinoGenerator.forBlock['cambiar_velocidad'] = function(block) {
   const porcentaje = block.getFieldValue('VELOCIDAD');
 
   arduinoGenerator.definitions_['include_accelstepper'] = '#include <AccelStepper.h>';

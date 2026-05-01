@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:robokid/services/firebase_crud.dart';
-import 'package:robokid/services/firebase_services.dart';
+import 'package:robokid/services/services.dart';
 import 'package:robokid/widgets/widgets.dart';
 
 class RegisterScreen extends StatefulWidget {

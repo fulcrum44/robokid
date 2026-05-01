@@ -11,6 +11,13 @@ arduinoGenerator.definitions_ = {};
 // variable para guardar la configuración de bloques que se haye hecho en el editor de bloques
 arduinoGenerator.setups_ = {};
 
+arduinoGenerator.init = function(workspace) {
+  arduinoGenerator.definitions_ = {};
+  arduinoGenerator.setups_ = {};
+  
+  Object.getPrototypeOf(arduinoGenerator).init.call(this, workspace);
+};
+
 // ensamblado de los bloques en un sketch unificado
 arduinoGenerator.finish = function(code) {
   const includes = Object.values(this.definitions_).join('\n');
