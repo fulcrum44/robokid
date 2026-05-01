@@ -17,7 +17,7 @@ class AppRoutes {
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     return MaterialPageRoute(
-      builder: (context) => LoginScreen(),
+      builder: (context) => Wrapper(),
     ); //con esto si llamo a una pagina qie no existe
     //te lleva a la de login
   }

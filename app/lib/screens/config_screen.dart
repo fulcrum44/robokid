@@ -147,7 +147,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   CustomRegisterButton(
                     theme: theme,
                     content: const Text("Iniciar sesión"),
-                    onPressed: () => Navigator.pushNamed(context, 'login'),
+                    onPressed: () => Navigator.pushNamedAndRemoveUntil(context, 'wrapper', (route) => false),
                   ),
                   const SizedBox(height: 10),
                   CustomRegisterButton(
