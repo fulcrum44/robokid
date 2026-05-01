@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:robokid/screens/screens.dart';
 
-class NavegationScreen extends StatefulWidget {
-  const NavegationScreen({super.key});
+class NavigationScreen extends StatefulWidget {
+  const NavigationScreen({super.key});
 
   @override
-  State<NavegationScreen> createState() => _NavegationScreenState();
+  State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
-class _NavegationScreenState extends State<NavegationScreen> {
+class _NavigationScreenState extends State<NavigationScreen> {
   int _selectedIndex = 0;
   String? _projectId; // id del proyecto que se va a abrir en BlockScreen
   final _recordKey = GlobalKey<RecordScreenState>();

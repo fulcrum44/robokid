@@ -7,7 +7,7 @@ class AppRoutes {
 
   static Map<String, Widget Function(BuildContext)> routes = {
     'wrapper': (BuildContext context) => const Wrapper(),
-    'navigation': (BuildContext context) => const NavegationScreen(),
+    'navigation': (BuildContext context) => const NavigationScreen(),
     'login': (BuildContext context) => const LoginScreen(),
     'signup': (BuildContext context) => const RegisterScreen(),
     'blocksScreen': (BuildContext context) => const BlockScreen(),
