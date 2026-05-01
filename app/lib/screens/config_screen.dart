@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
+import 'package:robokid/providers/auth_provider.dart';
 import 'package:robokid/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,7 +29,10 @@ class _ConfigScreenState extends State<ConfigScreen> {
     _lastNameController = TextEditingController();
     // Cargamos el tema y el nombre al entrar a la pantalla
     _loadCurrentTheme();
-    _loadUserName();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserName();
+    });
   }
 
   // Leemos el tema guardado en el almacenamiento del teléfono
@@ -41,7 +45,9 @@ class _ConfigScreenState extends State<ConfigScreen> {
 
   // Partimos el displayName en nombre y apellido
   void _loadUserName() {
-    final user = FirebaseAuth.instance.currentUser;
+    final auth = context.read<AuthProvider>();
+    final user = auth.user;
+
     if (user?.displayName != null) {
       final parts = user!.displayName!.split(' ');
       _firstNameController.text = parts.isNotEmpty ? parts.first : '';
@@ -61,7 +67,9 @@ class _ConfigScreenState extends State<ConfigScreen> {
 
   // Guarda el nombre en Firebase y muestra confirmación
   Future<void> _saveSettings() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final auth = context.read<AuthProvider>();
+    final user = auth.user;
+
     final theme = Theme.of(context);
 
     try {
@@ -92,9 +100,12 @@ class _ConfigScreenState extends State<ConfigScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final user = FirebaseAuth.instance.currentUser;
+
+    final auth = context.watch<AuthProvider>(); 
+    final user = auth.user;
     // Si no hay usuario es que está en modo invitado
-    final bool isGuest = user == null;
+    final bool isGuest = auth.isGuest;
+
     final bool isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
@@ -165,7 +176,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
                     hintText: 'Email',
                     icon: Icons.email_outlined,
                     enabled: false,
-                    controller: TextEditingController(text: user.email),
+                    controller: TextEditingController(text: user?.email),
                   ),
                   const SizedBox(height: 15),
                   // Para vincular una cuenta Google a un usuario registrado con email
