@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
+
+import '../providers/auth_provider.dart';
 
 class BlockScreen extends StatefulWidget {
   final String? proyectoId; // si viene un id, cargamos ese proyecto al abrir
@@ -121,7 +123,11 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Se ejecuta cuando ya tenemos el workspaceJson actualizado
   Future<void> _completeSave() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final auth = context.read<AuthProvider>();
+    final user = auth.user;
+
+    final uid = user?.uid;
+    
     if (uid == null || _workspaceJson == null) return;
 
     // si es un proyecto nuevo, pedimos el nombre
@@ -308,6 +314,10 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Muestra el código generado en un panel inferior
   void _showCode() {
+    final auth = context.read<AuthProvider>(); 
+    // Si no hay usuario es que está en modo invitado
+    final bool isGuest = auth.isGuest;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -343,14 +353,17 @@ class _BlockScreenState extends State<BlockScreen> {
                           }
                         },
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.save),
-                        tooltip: 'Guardar proyecto',
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _save();
-                        },
-                      ),
+                      
+                      if (!isGuest)
+                        IconButton(
+                          icon: const Icon(Icons.save),
+                          tooltip: 'Guardar proyecto',
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _save();
+                          },
+                        ),
+
                       IconButton(
                         icon: const Icon(Icons.upload),
                         tooltip: 'Compilar y subir',
@@ -388,6 +401,10 @@ class _BlockScreenState extends State<BlockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>(); 
+    // Si no hay usuario es que está en modo invitado
+    final bool isGuest = auth.isGuest;
+
     return Scaffold(
       appBar: CustomAppBar(),
       body: Column(
@@ -406,14 +423,18 @@ class _BlockScreenState extends State<BlockScreen> {
                   child: const Icon(Icons.delete_outline),
                 ),
                 const SizedBox(width: 12),
+
                 // boton para guardar el proyecto
-                FloatingActionButton(
-                  heroTag: 'guardar',
-                  onPressed: _loaded ? _save : null,
-                  backgroundColor: _loaded ? null : Colors.grey,
-                  child: const Icon(Icons.save),
-                ),
-                const SizedBox(width: 12),
+                if (!isGuest)
+                  FloatingActionButton(
+                    heroTag: 'guardar',
+                    onPressed: _loaded ? _save : null,
+                    backgroundColor: _loaded ? null : Colors.grey,
+                    child: const Icon(Icons.save),
+                  ),
+                
+                if (!isGuest) const SizedBox(width: 12),
+
                 // boton para compilar (generar codigo arduino)
                 FloatingActionButton(
                   heroTag: 'compilar',
