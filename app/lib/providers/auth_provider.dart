@@ -6,7 +6,7 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   bool _isLoading = true; // manejamos el tiempo de carga cuando el usuario hace login o logout
 
-  bool get isGuest => _user == null || _user!.isAnonymous;
+  bool get isGuest => _user == null;
   User? get user => _user;
   bool get isLoading => _isLoading;
 

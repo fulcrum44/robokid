@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:robokid/screens/screens.dart';
+
+import '../providers/auth_provider.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
@@ -42,10 +45,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>(); 
+    // Si no hay usuario es que está en modo invitado
+    final bool isGuest = auth.isGuest;
+
     // no usamos const porque BlockScreen cambia segun el proyecto
     final screens = <Widget>[
       BlockScreen(proyectoId: _projectId),
-      RecordScreen(key: _recordKey, onOpenProject: _openProject),
+      if (!isGuest) RecordScreen(key: _recordKey, onOpenProject: _openProject),
       const ConfigScreen(),
     ];
 
@@ -59,10 +66,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
             icon: Icon(Icons.widgets_outlined),
             label: 'Bloques',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            label: 'Historial',
-          ),
+          
+          if (!isGuest)
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history_outlined),
+              label: 'Historial',
+            ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
             label: 'Ajustes',
