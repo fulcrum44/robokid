@@ -78,7 +78,7 @@ class AppTheme {
     progressIndicatorTheme: ProgressIndicatorThemeData(color: robokids),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
-    ),
+    )
   );
 
   // TEMA OSCURO

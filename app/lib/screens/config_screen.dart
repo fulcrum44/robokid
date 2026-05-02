@@ -146,13 +146,13 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   // Navegamos a login o registro según lo que elija
                   CustomRegisterButton(
                     theme: theme,
-                    content: const Text("Iniciar sesión"),
+                    content: Text("Iniciar sesión", style: theme.textTheme.titleMedium,),
                     onPressed: () => Navigator.pushNamedAndRemoveUntil(context, 'wrapper', (route) => false),
                   ),
                   const SizedBox(height: 10),
                   CustomRegisterButton(
                     theme: theme,
-                    content: const Text("Registrarse"),
+                    content: Text("Registrarse", style: theme.textTheme.titleMedium,),
                     onPressed: () => Navigator.pushNamed(context, 'signup'),
                   ),
                 ] else ...[
@@ -191,7 +191,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
                     icon: const Icon(Icons.link, color: Colors.blue),
                     label: Text(
                       'Vincular con Google',
-                      style: TextStyle(color: AppTheme.primaryText(isDark)),
+                      style: theme.textTheme.titleMedium,
                     ),
                     onPressed: () => CustomSnackBar.showSnackBar(
                       "Próximamente",
@@ -214,10 +214,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
               children: [
                 Text(
                   "Elige cómo quieres ver la aplicación",
-                  style: TextStyle(
-                    color: AppTheme.secondaryText(isDark),
-                    fontSize: 13,
-                  ),
+                  style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
@@ -237,21 +234,21 @@ class _ConfigScreenState extends State<ConfigScreen> {
                       value: 'system',
                       child: Text(
                         "Usar ajuste del teléfono",
-                        style: TextStyle(color: AppTheme.primaryText(isDark)),
+                        style: theme.textTheme.titleMedium,
                       ),
                     ),
                     DropdownMenuItem(
                       value: 'light',
                       child: Text(
                         "Modo Claro",
-                        style: TextStyle(color: AppTheme.primaryText(isDark)),
+                        style: theme.textTheme.titleMedium,
                       ),
                     ),
                     DropdownMenuItem(
                       value: 'dark',
                       child: Text(
                         "Modo Oscuro",
-                        style: TextStyle(color: AppTheme.primaryText(isDark)),
+                        style: theme.textTheme.titleMedium,
                       ),
                     ),
                   ],
