@@ -386,7 +386,7 @@ class _BlockScreenState extends State<BlockScreen> {
                         ),
 
                       IconButton(
-                        icon: const Icon(Icons.upload),
+                        icon: const Icon(Icons.play_circle_outline_sharp),
                         tooltip: 'Compilar y subir',
                         onPressed: () {
                           Navigator.pop(context);
@@ -454,7 +454,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 // boton para compilar (generar codigo arduino)
                 ElevatedButton(
                   style: ButtonStyle().copyWith(
-                    
+
                   ),
                   key: Key('compilar'),
                   onPressed: _loaded ? _compile : null,
