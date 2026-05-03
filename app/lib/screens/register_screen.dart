@@ -175,8 +175,9 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                         try {
                           final user = await firebaseAuth.createUser(
                             email: email,
-                            password: passwordController.text, 
-                            nombre: '$name $lastName', // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
+                            password: passwordController.text,
+                            nombre:
+                                '$name $lastName', // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
                           );
                           await insertUsuario(user!.uid, name, lastName, email);
                           await user.sendEmailVerification();
@@ -245,6 +246,66 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.035),
+
+              // Botón de Google
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                icon: const Icon(
+                  Icons.g_mobiledata,
+                  size: 28,
+                  color: Colors.red,
+                ),
+                label: Text(
+                  'Registrarse con Google',
+                  style: theme.textTheme.titleMedium,
+                ),
+                onPressed: buttonIsLoading
+                    ? null
+                    : () async {
+                        setState(() => buttonIsLoading = true);
+                        try {
+                          final user = await firebaseAuth.googleLogin(context);
+                          if (user != null) {
+                            if (!(await checkEmailExists(user.email ?? ''))) {
+                              // Usuario nuevo
+                              final parts = (user.displayName ?? '').split(' ');
+                              await insertUsuario(
+                                user.uid,
+                                parts.isNotEmpty ? parts.first : '',
+                                user.email,
+                                parts.length > 1
+                                    ? parts.sublist(1).join(' ')
+                                    : '',
+                                vinculadoGoogle: true,
+                              );
+                            }
+                            if (context.mounted) {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                'navigation',
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            CustomSnackBar.showSnackBar(
+                              'Error al registrarse con Google',
+                              context,
+                              theme,
+                            );
+                          }
+                        } finally {
+                          if (mounted) setState(() => buttonIsLoading = false);
+                        }
+                      },
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.035),

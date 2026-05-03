@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:robokid/services/firebase_crud.dart'; // ← añadido
 import 'package:robokid/services/firebase_services.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
@@ -21,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscureText = true;
   // BORRAR ?
   bool mostrarBotones = false;
+
+  final FirebaseServices firebaseServices = FirebaseServices();
 
   @override
   void initState() {
@@ -75,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     top: MediaQuery.of(context).size.height * 0.0225,
                   ),
                   width: MediaQuery.of(context).size.width * 0.825,
-                  height: MediaQuery.of(context).size.height * 0.5625,
+                  height: MediaQuery.of(context).size.height * 0.62,
                   decoration: BoxDecoration(
                     color: theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(30),
@@ -109,11 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         hintText: 'Contraseña',
                         obscureText: obscureText,
                         suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              obscureText = !obscureText;
-                            });
-                          },
+                          onPressed: () => setState(() => obscureText = !obscureText),
                           icon: Icon(
                             obscureText
                                 ? Icons.visibility_outlined
@@ -160,8 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   );
                                   return;
                                 }
-                                final String email = emailController.text
-                                    .trim();
+                                final String email = emailController.text.trim();
                                 final String password = passwordController.text;
 
                                 setState(() => buttonIsLoading = true);
@@ -179,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         context,
                                         theme,
                                       );
-                                      // Aquí vendría la navegación, pero esta es gestionada por el StreamBuilder que maneja la sesión en el Wrapper
+                                      Navigator.pushReplacementNamed(context, 'navigation');
                                     }
                                   } else {
                                     if (context.mounted) {
@@ -242,6 +240,62 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: MediaQuery.of(context).size.height * 0.0225,
                       ),
 
+                      // Botón de Google ← añadido
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          side: BorderSide(color: containerBorder, width: 2),
+                        ),
+                        icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.red),
+                        label: Text('Continuar con Google', style: theme.textTheme.titleMedium),
+                        onPressed: buttonIsLoading
+                            ? null
+                            : () async {
+                                setState(() => buttonIsLoading = true);
+                                try {
+                                  final user = await firebaseServices.googleLogin(context);
+                                  if (user != null) {
+                                    // Si es nuevo en Firestore lo insertamos
+                                    if (!(await checkEmailExists(user.email ?? ''))) {
+                                      final parts = (user.displayName ?? '').split(' ');
+                                      await insertUsuario(
+                                        user.uid,
+                                        parts.isNotEmpty ? parts.first : '',
+                                        user.email,
+                                        parts.length > 1 ? parts.sublist(1).join(' ') : '',
+                                        vinculadoGoogle: true,
+                                      );
+                                    }
+                                    if (context.mounted) {
+                                      CustomSnackBar.showSnackBar(
+                                        '¡Bienvenido ${user.displayName ?? ''}!',
+                                        context,
+                                        theme,
+                                      );
+                                      Navigator.pushReplacementNamed(context, 'navigation');
+                                    }
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    CustomSnackBar.showSnackBar(
+                                      'Error al iniciar con Google',
+                                      context,
+                                      theme,
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) setState(() => buttonIsLoading = false);
+                                }
+                              },
+                      ),
+
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
+
                       OutlinedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, 'navigation');
@@ -274,7 +328,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(color: containerBorder, width: 3),
                   ),
-
                   child: Column(
                     children: [
                       SizedBox(

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:robokid/services/firebase_crud.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/firebase_services.dart';
@@ -14,6 +15,7 @@ class AjustesScreen extends StatefulWidget {
 }
 
 class _AjustesScreenState extends State<AjustesScreen> {
+  final FirebaseServices _firebaseServices = FirebaseServices();
   // Tema seleccionado, por defecto sigue el sistema
   String _selectedTheme = 'system';
 
@@ -65,22 +67,23 @@ class _AjustesScreenState extends State<AjustesScreen> {
     final theme = Theme.of(context);
 
     try {
-      if (user != null &&
-          (_firstNameController.text.isNotEmpty ||
-              _lastNameController.text.isNotEmpty)) {
-        // Concatenamos nombre y apellido hasta que Firestore los guarde por separado
-        final fullName =
-            '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'
-                .trim();
-        await user.updateDisplayName(fullName);
-      }
+      if (user != null) {
+        final name = _firstNameController.text.trim();
+        final lastName = _lastNameController.text.trim();
 
-      if (mounted) {
-        CustomSnackBar.showSnackBar(
-          "Configuración actualizada",
-          context,
-          theme,
-        );
+        await user.updateDisplayName('$name $lastName'.trim());
+
+        //Actualizar Firestore con el nuevo nombre
+        await updateUser(user.uid, name, lastName);
+
+        if (mounted) {
+          CustomSnackBar.showSnackBar(
+            "Configuración actualizada",
+            context,
+            theme,
+          );
+          setState(() {});
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -102,7 +105,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
-          // stretch para que el título centrado ocupe todo el ancho
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
@@ -115,7 +117,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Sección de perfil: distinto contenido según si hay sesión o no
             _buildSectionCard(
               theme,
               isDark: isDark,
@@ -169,25 +170,54 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   ),
                   const SizedBox(height: 15),
                   // Para vincular una cuenta Google a un usuario registrado con email
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                  if (!user.providerData.any(
+                    (p) => p.providerId == 'google.com',
+                  )) ...[
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        side: BorderSide(color: AppTheme.dividerColor(isDark)),
                       ),
-                      side: BorderSide(color: AppTheme.dividerColor(isDark)),
+                      icon: const Icon(Icons.link, color: Colors.blue),
+                      label: Text(
+                        'Vincular con Google',
+                        style: TextStyle(color: AppTheme.primaryText(isDark)),
+                      ),
+                      onPressed: () async {
+                        try {
+                          await _firebaseServices.linkGoogleAccount(context);
+                          if (mounted) {
+                            // Recargamos el usuario para que providerData se actualice
+                            await FirebaseAuth.instance.currentUser?.reload();
+                            setState(
+                              () {},
+                            );
+
+                            CustomSnackBar.showSnackBar(
+                              "Cuenta vinculada con éxito",
+                              context,
+                              theme,
+                            );
+                          }
+                        } on FirebaseAuthException catch (e) {
+                          if (mounted) {
+                            CustomSnackBar.showSnackBar(
+                              e.code == 'credential-already-in-use'
+                                  ? 'Esta cuenta de Google ya está en uso por otro usuario'
+                                  : e.code == 'provider-already-linked'
+                                  ? 'Ya tienes Google vinculado'
+                                  : 'Error al vincular: ${e.message}',
+                              context,
+                              theme,
+                            );
+                          }
+                        }
+                      },
                     ),
-                    icon: const Icon(Icons.link, color: Colors.blue),
-                    label: Text(
-                      'Vincular con Google',
-                      style: TextStyle(color: AppTheme.primaryText(isDark)),
-                    ),
-                    onPressed: () => CustomSnackBar.showSnackBar(
-                      "Próximamente",
-                      context,
-                      theme,
-                    ),
-                  ),
+                  ],
                 ],
               ],
             ),
@@ -366,8 +396,34 @@ class _AjustesScreenState extends State<AjustesScreen> {
           ),
         ),
         onTap: () async {
-          await FirebaseServices().logout();
-          // Volvemos al login tras cerrar sesión gracias al StreamBuilder del Wrapper
+          // Mostramos diálogo de carga
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) =>
+                const Center(child: CircularProgressIndicator()),
+          );
+
+          try {
+            await FirebaseServices().logout();
+
+            if (mounted) {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                'login',
+                (route) => false,
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              Navigator.pop(context);
+              CustomSnackBar.showSnackBar(
+                'Error al cerrar sesión',
+                context,
+                Theme.of(context),
+              );
+            }
+          }
         },
       ),
     );

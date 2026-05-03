@@ -7,12 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:79447508615:android:7bea69ecea463af98e5a22",
+        "mobilesdk_app_id": "1:79447508615:android:d4705ac6a03953438e5a22",
         "android_client_info": {
-          "package_name": "com.example.robokid"
+          "package_name": "com.Robokids.firebase"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "79447508615-ucenmec9sl87csr3jb9h0un0e5kvdsu8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Robokids.firebase",
+            "certificate_hash": "23389fc43463e0f315f9e44ea15999f5386b68b6"
+          }
+        },
+        {
+          "client_id": "79447508615-r7l8ojfqbq1fef0erm95fbbgaguktn4k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCVHOM3cKHyYFp6-o-1rl5PWQGpnYNujSI"
@@ -20,7 +33,63 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "79447508615-r7l8ojfqbq1fef0erm95fbbgaguktn4k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "79447508615-dg5ativo9712na98tm0dmn1sqtnhbts0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.robokid"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:79447508615:android:7bea69ecea463af98e5a22",
+        "android_client_info": {
+          "package_name": "com.example.robokid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "79447508615-crvtarivirqemmpthqknrfdo4vpnnogh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.robokid",
+            "certificate_hash": "23389fc43463e0f315f9e44ea15999f5386b68b6"
+          }
+        },
+        {
+          "client_id": "79447508615-r7l8ojfqbq1fef0erm95fbbgaguktn4k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVHOM3cKHyYFp6-o-1rl5PWQGpnYNujSI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "79447508615-r7l8ojfqbq1fef0erm95fbbgaguktn4k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "79447508615-dg5ativo9712na98tm0dmn1sqtnhbts0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.robokid"
+              }
+            }
+          ]
         }
       }
     }
