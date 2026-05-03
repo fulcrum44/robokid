@@ -233,7 +233,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
                     DropdownMenuItem(
                       value: 'system',
                       child: Text(
-                        "Usar ajuste del teléfono",
+                        "Predeterminado del sistema",
                         style: theme.textTheme.titleMedium,
                       ),
                     ),
