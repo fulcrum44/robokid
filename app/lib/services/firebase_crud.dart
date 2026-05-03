@@ -11,7 +11,7 @@ Future<List> getIUser() async {
 
   QuerySnapshot queryUser = await collectionReferenceUser.get();
   
-  queryUser.docs.forEach((documento) {
+  for (var documento in queryUser.docs) {
     final Map<String, dynamic> data = documento.data() as Map<String, dynamic>;
     final userMap = {
       "email" : data['email'],
@@ -20,7 +20,7 @@ Future<List> getIUser() async {
       "uid" : documento.id,
     };
     user.add(userMap);
-  });
+  }
 
   return user;
 }

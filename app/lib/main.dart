@@ -15,8 +15,9 @@ void main() async {
   final String savedTheme = prefs.getString('theme') ?? 'system';
 
   ThemeMode initialMode;
-  if (savedTheme == 'light') initialMode = ThemeMode.light;
-  else if (savedTheme == 'dark') initialMode = ThemeMode.dark;
+  if (savedTheme == 'light') {
+    initialMode = ThemeMode.light;
+  } else if (savedTheme == 'dark') initialMode = ThemeMode.dark;
   else initialMode = ThemeMode.system;
   
   runApp(MyApp(initialTheme: initialMode));
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
 
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
-      builder: (_, ThemeMode currentMode, __) {
+      builder: (_, ThemeMode currentMode, _) {
         return MaterialApp(
           // Etiqueta debug
           debugShowCheckedModeBanner: false,
