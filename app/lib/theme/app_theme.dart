@@ -69,6 +69,21 @@ class AppTheme {
         color: Colors.black,
         fontSize: 12,
       ),
+      bodyLarge: TextStyle(
+        fontFamily: GoogleFonts.outfit().fontFamily,
+        color: Colors.black87,
+        fontSize: 16,
+      ),
+      bodyMedium: TextStyle(
+        fontFamily: GoogleFonts.outfit().fontFamily,
+        color: Colors.black87,
+        fontSize: 14,
+      ),
+      bodySmall: TextStyle(
+        fontFamily: GoogleFonts.outfit().fontFamily,
+        color: Colors.black54,
+        fontSize: 12,
+      ),
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: robokids,
@@ -126,6 +141,21 @@ class AppTheme {
       titleSmall: TextStyle(
         fontFamily: GoogleFonts.outfit().fontFamily,
         color: Colors.white,
+        fontSize: 12,
+      ),
+      bodyLarge: TextStyle(
+        fontFamily: GoogleFonts.outfit().fontFamily,
+        color: Colors.white,
+        fontSize: 16,
+      ),
+      bodyMedium: TextStyle(
+        fontFamily: GoogleFonts.outfit().fontFamily,
+        color: Colors.white70,
+        fontSize: 14,
+      ),
+      bodySmall: TextStyle(
+        fontFamily: GoogleFonts.outfit().fontFamily,
+        color: Colors.white54,
         fontSize: 12,
       ),
     ),
