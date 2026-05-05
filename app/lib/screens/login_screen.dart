@@ -256,7 +256,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     context,
                                     theme,
                                   );
-                                  Navigator.pushReplacementNamed(context, 'navigation');
                                 }
                               }
                             } on FirebaseAuthException catch (e) {

@@ -264,7 +264,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                         if (context.mounted) {
                           Navigator.pushReplacementNamed(
                             context,
-                            'navigation',
+                            'wrapper',
                           );
                         }
                       }
