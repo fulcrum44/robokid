@@ -7,12 +7,9 @@ import 'package:robokid/services/firebase_crud.dart';
 class FirebaseServices {
 
   static FirebaseAuth auth = FirebaseAuth.instance;
+  static final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  static bool isGoogleInitialized = false;
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-
-  static const String _webClientId =
-      '79447508615-r7l8ojfqbq1fef0erm95fbbgaguktn4k.apps.googleusercontent.com';
-  
   Future<User?> login({required String email, required String password}) async {
     try {
       //con esto intentamos ahcer un inicio de sesion con el autentificacion de firebase
@@ -65,66 +62,92 @@ class FirebaseServices {
     }
   }
 
-  Future<User?> googleLogin(BuildContext context) async {
+  Future<void> initGoogleSignIn() async {
+    if (!isGoogleInitialized) {
+      await _googleSignIn.initialize(
+        serverClientId: '79447508615-r7l8ojfqbq1fef0erm95fbbgaguktn4k.apps.googleusercontent.com'
+      );
+    }
+    isGoogleInitialized = true;
+  }
+
+  Future<UserCredential?> googleLogin(BuildContext context) async {
     try {
+      await initGoogleSignIn();
 
-      await _googleSignIn.signOut();
-
-      await _googleSignIn.initialize(serverClientId: _webClientId);
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      final bool emailExists = await checkEmailExists(googleUser.email);
+      final bool googleLinked = await isUserLinkedToGoogle(googleUser.email);
 
-      final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
+      if (emailExists && !googleLinked) {
+        await _googleSignIn.signOut();
+        throw FirebaseAuthException(
+          code: 'account-exists-with-different-credential',
+          email: googleUser.email,
+          message: 'Ya existe una cuenta con este correo usando email/password.',
+        );
+      }
 
-      if (await checkEmailExists(googleUser.email)) {
-        if (!(await isUserLinkedToGoogle(googleUser.email))) {
-          if (context.mounted) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => AlertDialog(
-                title: const Text('Correo ya registrado'),
-                content: const Text(
-                  'Este correo ya tiene cuenta con contraseña.\n'
-                  'Inicia sesión normalmente y vincula Google desde Ajustes.',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Entendido'),
-                  ),
-                ],
-              ),
-            );
-          }
-          return null;
+      final idToken = googleUser.authentication.idToken;
+      final authorizationClient = googleUser.authorizationClient;
+
+      GoogleSignInClientAuthorization? authorization =
+          await authorizationClient.authorizationForScopes(['email', 'profile']);
+
+      if (authorization?.accessToken == null) {
+        authorization = await authorizationClient
+            .authorizationForScopes(['email', 'profile']);
+        if (authorization?.accessToken == null) {
+          throw FirebaseAuthException(
+            code: 'google-auth-failed',
+            message: 'No se pudo obtener el access token.',
+          );
         }
       }
 
-      final result = await auth.signInWithCredential(credential);
-      return result.user;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: authorization!.accessToken,
+        idToken: idToken,
+      );
+
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final User? user = userCredential.user;
+      if (user != null) {
+        final userDoc = await getUser(user.uid);
+        if (!userDoc.exists) {
+          await insertUsuario(
+            user.uid,
+            user.displayName ?? '',
+            user.email,
+            user.displayName ?? '',
+            vinculadoGoogle: true,
+          );
+        }
+      }
+
+      return userCredential;
+
+    } on FirebaseAuthException catch (e) {
+      rethrow;
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) return null;
-      debugPrint('googleLogin error: $e');
-      return null;
-    } catch (e) {
-      debugPrint('googleLogin error: $e');
-      return null;
+      rethrow;
+    } catch (e, stack) {
+      rethrow;
     }
   }
 
   // vincular Google a cuenta existente
   Future<void> linkGoogleAccount(BuildContext context) async {
     try {
-      await _googleSignIn.initialize(serverClientId: _webClientId);
+      initGoogleSignIn();
+      
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+          googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "79447508615-osi86kmtoeqst873f19r35mpufcq2sq0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Robokids.firebase",
+            "certificate_hash": "ef4120fe9c6e72a2a76cb2cb751b9d4a0822e898"
+          }
+        },
+        {
           "client_id": "79447508615-ucenmec9sl87csr3jb9h0un0e5kvdsu8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -63,6 +71,14 @@
           "android_info": {
             "package_name": "com.example.robokid",
             "certificate_hash": "23389fc43463e0f315f9e44ea15999f5386b68b6"
+          }
+        },
+        {
+          "client_id": "79447508615-d6e6rdgl4bdhl0sk7k112i586scf65ue.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.robokid",
+            "certificate_hash": "ef4120fe9c6e72a2a76cb2cb751b9d4a0822e898"
           }
         },
         {

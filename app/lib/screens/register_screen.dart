@@ -274,25 +274,33 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                         try {
                           final user = await firebaseAuth.googleLogin(context);
                           if (user != null) {
-                            if (!(await checkEmailExists(user.email ?? ''))) {
-                              // Usuario nuevo
-                              final parts = (user.displayName ?? '').split(' ');
-                              await insertUsuario(
-                                user.uid,
-                                parts.isNotEmpty ? parts.first : '',
-                                user.email,
-                                parts.length > 1
-                                    ? parts.sublist(1).join(' ')
-                                    : '',
-                                vinculadoGoogle: true,
-                              );
-                            }
+                            //
                             if (context.mounted) {
                               Navigator.pushReplacementNamed(
                                 context,
                                 'navigation',
                               );
                             }
+                          }
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'account-exists-with-different-credential') {
+                            showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                title: const Text('Cuenta ya existente'),
+                                content: const Text(
+                                  'Ya tienes una cuenta con ese correo. '
+                                  'Inicia sesión con tu contraseña y desde dentro '
+                                  'de la app podrás vincular Google.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Entendido'),
+                                  ),
+                                ],
+                              ),
+                            );
                           }
                         } catch (e) {
                           if (context.mounted) {

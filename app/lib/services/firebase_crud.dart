@@ -2,32 +2,38 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 FirebaseFirestore db = FirebaseFirestore.instance;
 
-Future<List> getIUser() async {
-  List user = [];
+Future<List<Map<String, dynamic>>> getUsers() async {
+  List<Map<String, dynamic>> users = [];
 
-  CollectionReference collectionReferenceUser = db.collection('Usuarios');
+  QuerySnapshot query = await db
+      .collection("Proyectos")
+      .get();
 
-  QuerySnapshot queryUser = await collectionReferenceUser.get();
-
-  for (var documento in queryUser.docs) {
+  for (var documento in query.docs) {
     final Map<String, dynamic> data = documento.data() as Map<String, dynamic>;
-    final userMap = {
-      "email": data['email'],
+    users.add({
+      "id": documento.id,
       "name": data['name'],
       "last_name": data['last_name'],
-      "uid": documento.id,
-    };
-    user.add(userMap);
+      "email": data['email'],
+      "vinculado_Google": data['vinculado_Google'],
+    });
   }
 
-  return user;
+  return users;
+}
+
+Future<DocumentSnapshot<Map<String, dynamic>>> getUser(String userId) async {
+  DocumentReference<Map<String, dynamic>> collectionReferenceUser = db.collection('Usuarios').doc(userId);
+
+  return await collectionReferenceUser.get();
 }
 
 Future<void> insertUsuario(
   String uid,
   String? name,
-  String? email,
-  String? lastName, {
+  String? lastName,
+  String? email, {
   bool vinculadoGoogle = false,
 }) async {
   await db.collection("Usuarios").doc(uid).set({

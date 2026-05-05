@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:robokid/services/firebase_crud.dart'; // ← añadido
 import 'package:robokid/services/firebase_services.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
@@ -257,26 +256,36 @@ class _LoginScreenState extends State<LoginScreen> {
                                 setState(() => buttonIsLoading = true);
                                 try {
                                   final user = await firebaseServices.googleLogin(context);
+
                                   if (user != null) {
-                                    // Si es nuevo en Firestore lo insertamos
-                                    if (!(await checkEmailExists(user.email ?? ''))) {
-                                      final parts = (user.displayName ?? '').split(' ');
-                                      await insertUsuario(
-                                        user.uid,
-                                        parts.isNotEmpty ? parts.first : '',
-                                        user.email,
-                                        parts.length > 1 ? parts.sublist(1).join(' ') : '',
-                                        vinculadoGoogle: true,
-                                      );
-                                    }
                                     if (context.mounted) {
                                       CustomSnackBar.showSnackBar(
-                                        '¡Bienvenido ${user.displayName ?? ''}!',
+                                        '¡Bienvenido!',
                                         context,
                                         theme,
                                       );
                                       Navigator.pushReplacementNamed(context, 'navigation');
                                     }
+                                  }
+                                } on FirebaseAuthException catch (e) {
+                                  if (e.code == 'account-exists-with-different-credential') {
+                                    showDialog(
+                                      context: context,
+                                      builder: (_) => AlertDialog(
+                                        title: const Text('Cuenta ya existente'),
+                                        content: const Text(
+                                          'Ya tienes una cuenta con ese correo. '
+                                          'Inicia sesión con tu contraseña y desde dentro '
+                                          'de la app podrás vincular Google.',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: const Text('Entendido'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
                                   }
                                 } catch (e) {
                                   if (context.mounted) {
