@@ -1,7 +1,6 @@
 // lib/screens/send_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 
 class SendScreen extends StatefulWidget {
@@ -21,30 +20,7 @@ class _SendScreenState extends State<SendScreen> {
   String _log = "";
   bool _uploading = false;
 
-  Future<void> _pickFile() async {
-    // 1. Ya no pedimos permisos manualmente aquí.
-    // El sistema Android abrirá su propio explorador y nos dará acceso al archivo seleccionado.
-
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ["bin"],
-    );
-
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _binPath = result.files.single.path!;
-        _binName = result.files.single.name;
-        _log = "";
-      });
-    }
-  }
-
   Future<void> _uploadFirmware() async {
-    if (_binPath == null) {
-      _appendLog("⚠ Selecciona un archivo .bin primero.");
-      return;
-    }
-
     setState(() {
       _uploading = true;
       _log = "";
@@ -52,20 +28,20 @@ class _SendScreenState extends State<SendScreen> {
 
     final url = Uri.parse("http://$_espIp:$_espPort/update");
     _appendLog("→ Conectando a ESP8266 en $_espIp ...");
-    _appendLog("⚠ Asegúrate de estar conectado al WiFi 'ESP8266-OTA'");
+    _appendLog("⚠ Asegúrate de estar conectado al WiFi 'ESP8266-OTA' y tener desactivados los datos moviles");
 
     try {
       final request = http.MultipartRequest("POST", url);
 
       request.files.add(
-        await http.MultipartFile.fromPath(
+        await http.MultipartFile.fromBytes(
           "firmware",
-          _binPath!,
+          widget.firmwareBytes,
           filename: "firmware.bin",
         ),
       );
 
-      final fileSize = File(_binPath!).lengthSync();
+      final fileSize = widget.firmwareBytes.length;
       _appendLog("→ Enviando ${(fileSize / 1024).toStringAsFixed(1)} KB ...");
 
       final streamed = await request.send().timeout(
@@ -75,14 +51,13 @@ class _SendScreenState extends State<SendScreen> {
 
       if (response.statusCode == 200) {
         _appendLog("✓ Flash completado. La placa está reiniciando...");
-        _appendLog("  El LED debería parpadear en unos segundos.");
       } else {
         _appendLog("✗ Error (${response.statusCode}): ${response.body}");
       }
     } on SocketException {
       _appendLog("✗ No se pudo conectar.");
       _appendLog("  ¿Estás conectado al WiFi 'ESP8266-OTA'?");
-      _appendLog("  ¿La placa está encendida y en los primeros 10 segundos?");
+      _appendLog("  ¿La placa está encendida y los datos moviles estan desactivados?");
     } catch (e) {
       _appendLog("✗ Error: $e");
     } finally {
@@ -126,30 +101,6 @@ class _SendScreenState extends State<SendScreen> {
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            Card(
-              child: ListTile(
-                leading: Icon(
-                  _binPath != null
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
-                  color: _binPath != null ? Colors.green : Colors.grey,
-                ),
-                title: Text(_binName),
-                subtitle: _binPath != null
-                    ? Text(
-                        "${(File(_binPath!).lengthSync() / 1024).toStringAsFixed(1)} KB",
-                        style: TextStyle(color: theme.colorScheme.primary),
-                      )
-                    : null,
-                trailing: TextButton(
-                  onPressed: _uploading ? null : _pickFile,
-                  child: const Text("Buscar"),
-                ),
               ),
             ),
 

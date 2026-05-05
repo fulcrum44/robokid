@@ -6,8 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
+import 'dart:typed_data';
 
 import '../providers/auth_provider.dart';
+
+Uint8List? _firmwareBytes; // .bin recibido tras compilar
 
 class BlockScreen extends StatefulWidget {
   final String? proyectoId; // si viene un id, cargamos ese proyecto al abrir
@@ -264,6 +267,7 @@ class _BlockScreenState extends State<BlockScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       if (response.statusCode == 200) {
+        setState(() => _firmwareBytes = response.bodyBytes);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Compilación exitosa'),
@@ -442,6 +446,22 @@ class _BlockScreenState extends State<BlockScreen> {
                   backgroundColor: _loaded ? null : Colors.grey,
                   child: const Icon(Icons.play_arrow),
                 ),
+
+                FloatingActionButton.extended(
+                heroTag: 'enviar',
+                onPressed: _firmwareBytes != null  // solo activo si hay .bin
+                ? () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SendScreen(
+                      firmwareBytes: _firmwareBytes!,
+                      firmwareName: 'firmware.bin',
+                    ),
+                  ),
+                )
+              : null,
+              label: const Text('ENVIAR'),
+              ),
               ],
             ),
           ),
