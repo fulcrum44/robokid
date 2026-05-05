@@ -2,48 +2,84 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 FirebaseFirestore usersDB = FirebaseFirestore.instance;
 
-Future<Map<String, dynamic>?> getIUser(String userId) async {
-  final doc = await usersDB.collection("Usuarios").doc(userId).get();
-  
-  if (!doc.exists) return null;
+Future<List<Map<String, dynamic>>> getUsers() async {
+  List<Map<String, dynamic>> users = [];
 
-  final userData = doc.data() as Map<String, dynamic>;
+  QuerySnapshot query = await usersDB
+      .collection("Proyectos")
+      .get();
 
-  return {
-    "uid" : doc.id,
-    "email" : userData['email'],
-    "name" : userData['name'],
-    "last_name" : userData['last_name'],
-  };
+  for (var documento in query.docs) {
+    final Map<String, dynamic> data = documento.data() as Map<String, dynamic>;
+    users.add({
+      "id": documento.id,
+      "name": data['name'],
+      "last_name": data['last_name'],
+      "email": data['email'],
+      "vinculado_Google": data['vinculado_Google'],
+    });
+  }
 
+  return users;
+}
+
+Future<DocumentSnapshot<Map<String, dynamic>>> getUser(String userId) async {
+  DocumentReference<Map<String, dynamic>> collectionReferenceUser = usersDB.collection('Usuarios').doc(userId);
+
+  return await collectionReferenceUser.get();
 }
 
 Future<void> insertUsuario(
   String uid,
   String? name,
-  String? email,
   String? lastName,
-) async {
+  String? email, {
+  bool vinculadoGoogle = false,
+}) async {
   await usersDB.collection("Usuarios").doc(uid).set({
     "name": name,
     "last_name": lastName,
     "email": email,
+    "vinculado_Google": vinculadoGoogle,
   });
+}
+
+Future<bool> checkEmailExists(String email) async {
+  QuerySnapshot query = await usersDB
+      .collection("Usuarios")
+      .where("email", isEqualTo: email)
+      .get();
+  return query.docs.isNotEmpty;
+}
+
+Future<bool> isUserLinkedToGoogle(String email) async {
+  QuerySnapshot query = await usersDB
+      .collection("Usuarios")
+      .where("email", isEqualTo: email)
+      .get();
+
+  if (query.docs.isNotEmpty) {
+    final data = query.docs.first.data() as Map<String, dynamic>;
+    return data['vinculado_Google'] ?? false;
+  }
+  return false;
+}
+
+Future<void> updateLinkStatus(String uid, bool status) async {
+  await usersDB.collection("Usuarios").doc(uid).update({"vinculado_Google": status});
 }
 
 Future<void> updateUser(
   String uid,
   String? newName,
-  String? newEmail,
   String? newLastName,
 ) async {
   await usersDB.collection("Usuarios").doc(uid).update({
-    "name": newName,
-    "last_name": newLastName,
-    "email": newEmail,
+    if (newName != null) "name": newName,
+    if (newLastName != null) "last_name": newLastName,
   });
 }
 
-  Future<void> deleteUser(String uid) async {
+Future<void> deleteUser(String uid) async {
   await usersDB.collection("Usuarios").doc(uid).delete();
 }

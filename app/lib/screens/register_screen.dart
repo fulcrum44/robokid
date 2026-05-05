@@ -174,8 +174,9 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                         try {
                           final user = await firebaseAuth.createUser(
                             email: email,
-                            password: passwordController.text, 
-                            nombre: '$name $lastName', // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
+                            password: passwordController.text,
+                            nombre:
+                                '$name $lastName', // llamo la contraseña directamente del controlador para no tenerla guardada en una variable. el controlador solamente mira el texto del campo contraseña cuando se le da al botón de 'Registrarse' y luego, al cambiar de panalla con el dispose() se limpia el controlador.
                           );
                           await insertUsuario(user!.uid, name, lastName, email);
                           await user.sendEmailVerification();
@@ -244,6 +245,61 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.035),
+
+              // Botón de Google
+              GoogleButton(
+                screen: 'signup',
+                onPressed: buttonIsLoading
+                  ? null
+                  : () async {
+                    setState(() => buttonIsLoading = true);
+                    try {
+                      final user = await firebaseAuth.googleLogin(context);
+                      if (user != null) {
+                        //
+                        if (context.mounted) {
+                          Navigator.pushReplacementNamed(
+                            context,
+                            'wrapper',
+                          );
+                        }
+                      }
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == 'account-exists-with-different-credential') {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('Cuenta ya existente'),
+                            content: const Text(
+                              'Ya tienes una cuenta con ese correo. '
+                              'Inicia sesión con tu contraseña y desde dentro '
+                              'de la app podrás vincular Google.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Entendido'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        CustomSnackBar.showSnackBar(
+                          'Error al registrarse con Google',
+                          context,
+                          theme,
+                        );
+                      }
+                    } finally {
+                      if (mounted) setState(() => buttonIsLoading = false);
+                    }
+                  },
+                textTheme: theme.textTheme.titleMedium
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.035),
