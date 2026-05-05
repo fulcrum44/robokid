@@ -209,15 +209,25 @@ class _BlockScreenState extends State<BlockScreen> {
   // Dialogo para que el usuario ponga nombre al proyecto
   Future<String?> _getProjectName() async {
     final controller = TextEditingController();
+    final theme = Theme.of(context);
 
     return showDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Nombre del proyecto'),
+          backgroundColor: theme.scaffoldBackgroundColor,
+          title: Text(
+            'Nombre del proyecto',
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: theme.brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+            ),
+          ),
           content: TextField(
             controller: controller,
             autofocus: true,
+            style: theme.textTheme.titleMedium,
             decoration: const InputDecoration(hintText: 'Ej: Mi robot'),
           ),
           actions: [
@@ -318,6 +328,7 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Muestra el código generado en un panel inferior
   void _showCode() {
+    final theme = Theme.of(context);
     final auth = context.read<AuthProvider>(); 
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
@@ -325,10 +336,12 @@ class _BlockScreenState extends State<BlockScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: theme.scaffoldBackgroundColor,
       builder: (context) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.5,
           padding: const EdgeInsets.all(16),
+          color: theme.scaffoldBackgroundColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -389,7 +402,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 child: SingleChildScrollView(
                   child: SelectableText(
                     _code ?? '',
-                    style: const TextStyle(
+                    style: theme.textTheme.titleSmall?.copyWith(
                       fontFamily: 'monospace',
                       fontSize: 13,
                     ),

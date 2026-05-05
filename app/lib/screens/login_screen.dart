@@ -22,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // BORRAR ?
   bool showButtons = false;
 
+  final FirebaseServices firebaseServices = FirebaseServices();
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     top: MediaQuery.of(context).size.height * 0.0225,
                   ),
                   width: MediaQuery.of(context).size.width * 0.825,
-                  height: MediaQuery.of(context).size.height * 0.5625,
+                  height: MediaQuery.of(context).size.height * 0.62,
                   decoration: BoxDecoration(
                     color: theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(30),
@@ -109,11 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         hintText: 'Contraseña',
                         obscureText: obscureText,
                         suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              obscureText = !obscureText;
-                            });
-                          },
+                          onPressed: () => setState(() => obscureText = !obscureText),
                           icon: Icon(
                             obscureText
                                 ? Icons.visibility_outlined
@@ -160,8 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   );
                                   return;
                                 }
-                                final String email = emailController.text
-                                    .trim();
+                                final String email = emailController.text.trim();
                                 final String password = passwordController.text;
 
                                 setState(() => buttonIsLoading = true);
@@ -179,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         context,
                                         theme,
                                       );
-                                      // Aquí vendría la navegación, pero esta es gestionada por el StreamBuilder que maneja la sesión en el Wrapper
+                                      Navigator.pushReplacementNamed(context, 'navigation');
                                     }
                                   } else {
                                     if (context.mounted) {
@@ -242,6 +239,64 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: MediaQuery.of(context).size.height * 0.0225,
                       ),
 
+                      // Botón de Google
+                      GoogleButton(
+                        screen: 'login',
+                        onPressed: buttonIsLoading
+                          ? null
+                          : () async {
+                            setState(() => buttonIsLoading = true);
+                            try {
+                              final user = await firebaseServices.googleLogin(context);
+
+                              if (user != null) {
+                                if (context.mounted) {
+                                  CustomSnackBar.showSnackBar(
+                                    '¡Bienvenido!',
+                                    context,
+                                    theme,
+                                  );
+                                }
+                              }
+                            } on FirebaseAuthException catch (e) {
+                              if (e.code == 'account-exists-with-different-credential') {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: const Text('Cuenta ya existente'),
+                                    content: const Text(
+                                      'Ya tienes una cuenta con ese correo. '
+                                      'Inicia sesión con tu contraseña y desde dentro '
+                                      'de la app podrás vincular Google.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Entendido'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                CustomSnackBar.showSnackBar(
+                                  'Error al iniciar con Google',
+                                  context,
+                                  theme,
+                                );
+                              }
+                            } finally {
+                              if (mounted) setState(() => buttonIsLoading = false);
+                            }
+                          },
+                        textTheme: theme.textTheme.titleMedium
+                      ),
+
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.0225,
+                      ),
+
                       OutlinedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, 'navigation');
@@ -274,7 +329,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(color: containerBorder, width: 3),
                   ),
-
                   child: Column(
                     children: [
                       SizedBox(
