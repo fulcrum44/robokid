@@ -13,7 +13,6 @@ class AppRoutes {
     'blocksScreen': (BuildContext context) => const BlockScreen(),
     'record': (BuildContext context) => const RecordScreen(),
     'config': (BuildContext context) => const ConfigScreen(),
-    'send': (BuildContext context) => const SendScreen(),
   };
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {

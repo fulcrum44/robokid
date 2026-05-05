@@ -1,10 +1,18 @@
 // lib/screens/send_screen.dart
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class SendScreen extends StatefulWidget {
-  const SendScreen({super.key});
+  final Uint8List firmwareBytes;
+  final String firmwareName;
+
+  const SendScreen({
+    super.key,
+    required this.firmwareBytes,
+    required this.firmwareName,
+  });
 
   @override
   State<SendScreen> createState() => _SendScreenState();
@@ -15,8 +23,6 @@ class _SendScreenState extends State<SendScreen> {
   static const String _espIp = "192.168.4.1";
   static const int _espPort = 80;
 
-  String? _binPath;
-  String _binName = "Ningún archivo seleccionado";
   String _log = "";
   bool _uploading = false;
 
@@ -28,7 +34,9 @@ class _SendScreenState extends State<SendScreen> {
 
     final url = Uri.parse("http://$_espIp:$_espPort/update");
     _appendLog("→ Conectando a ESP8266 en $_espIp ...");
-    _appendLog("⚠ Asegúrate de estar conectado al WiFi 'ESP8266-OTA' y tener desactivados los datos moviles");
+    _appendLog(
+      "⚠ Asegúrate de estar conectado al WiFi 'ESP8266-OTA' y tener desactivados los datos moviles",
+    );
 
     try {
       final request = http.MultipartRequest("POST", url);
@@ -57,7 +65,9 @@ class _SendScreenState extends State<SendScreen> {
     } on SocketException {
       _appendLog("✗ No se pudo conectar.");
       _appendLog("  ¿Estás conectado al WiFi 'ESP8266-OTA'?");
-      _appendLog("  ¿La placa está encendida y los datos moviles estan desactivados?");
+      _appendLog(
+        "  ¿La placa está encendida y los datos moviles estan desactivados?",
+      );
     } catch (e) {
       _appendLog("✗ Error: $e");
     } finally {
@@ -107,9 +117,7 @@ class _SendScreenState extends State<SendScreen> {
             const SizedBox(height: 16),
 
             FilledButton.icon(
-              onPressed: (_binPath != null && !_uploading)
-                  ? _uploadFirmware
-                  : null,
+              onPressed: !_uploading ? _uploadFirmware : null,
               icon: _uploading
                   ? const SizedBox(
                       width: 18,
