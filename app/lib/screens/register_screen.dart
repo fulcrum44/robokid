@@ -251,69 +251,56 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.035),
 
               // Botón de Google
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                icon: const Icon(
-                  Icons.g_mobiledata,
-                  size: 28,
-                  color: Colors.red,
-                ),
-                label: Text(
-                  'Registrarse con Google',
-                  style: theme.textTheme.titleMedium,
-                ),
+              GoogleButton(
+                screen: 'signup',
                 onPressed: buttonIsLoading
-                    ? null
-                    : () async {
-                        setState(() => buttonIsLoading = true);
-                        try {
-                          final user = await firebaseAuth.googleLogin(context);
-                          if (user != null) {
-                            //
-                            if (context.mounted) {
-                              Navigator.pushReplacementNamed(
-                                context,
-                                'navigation',
-                              );
-                            }
-                          }
-                        } on FirebaseAuthException catch (e) {
-                          if (e.code == 'account-exists-with-different-credential') {
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Cuenta ya existente'),
-                                content: const Text(
-                                  'Ya tienes una cuenta con ese correo. '
-                                  'Inicia sesión con tu contraseña y desde dentro '
-                                  'de la app podrás vincular Google.',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('Entendido'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            CustomSnackBar.showSnackBar(
-                              'Error al registrarse con Google',
-                              context,
-                              theme,
-                            );
-                          }
-                        } finally {
-                          if (mounted) setState(() => buttonIsLoading = false);
+                  ? null
+                  : () async {
+                    setState(() => buttonIsLoading = true);
+                    try {
+                      final user = await firebaseAuth.googleLogin(context);
+                      if (user != null) {
+                        //
+                        if (context.mounted) {
+                          Navigator.pushReplacementNamed(
+                            context,
+                            'navigation',
+                          );
                         }
-                      },
+                      }
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == 'account-exists-with-different-credential') {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('Cuenta ya existente'),
+                            content: const Text(
+                              'Ya tienes una cuenta con ese correo. '
+                              'Inicia sesión con tu contraseña y desde dentro '
+                              'de la app podrás vincular Google.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Entendido'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        CustomSnackBar.showSnackBar(
+                          'Error al registrarse con Google',
+                          context,
+                          theme,
+                        );
+                      }
+                    } finally {
+                      if (mounted) setState(() => buttonIsLoading = false);
+                    }
+                  },
+                textTheme: theme.textTheme.titleMedium
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.035),

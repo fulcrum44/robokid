@@ -239,66 +239,59 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: MediaQuery.of(context).size.height * 0.0225,
                       ),
 
-                      // Botón de Google ← añadido
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          side: BorderSide(color: containerBorder, width: 2),
-                        ),
-                        icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.red),
-                        label: Text('Continuar con Google', style: theme.textTheme.titleMedium),
+                      // Botón de Google
+                      GoogleButton(
+                        screen: 'login',
                         onPressed: buttonIsLoading
-                            ? null
-                            : () async {
-                                setState(() => buttonIsLoading = true);
-                                try {
-                                  final user = await firebaseServices.googleLogin(context);
+                          ? null
+                          : () async {
+                            setState(() => buttonIsLoading = true);
+                            try {
+                              final user = await firebaseServices.googleLogin(context);
 
-                                  if (user != null) {
-                                    if (context.mounted) {
-                                      CustomSnackBar.showSnackBar(
-                                        '¡Bienvenido!',
-                                        context,
-                                        theme,
-                                      );
-                                      Navigator.pushReplacementNamed(context, 'navigation');
-                                    }
-                                  }
-                                } on FirebaseAuthException catch (e) {
-                                  if (e.code == 'account-exists-with-different-credential') {
-                                    showDialog(
-                                      context: context,
-                                      builder: (_) => AlertDialog(
-                                        title: const Text('Cuenta ya existente'),
-                                        content: const Text(
-                                          'Ya tienes una cuenta con ese correo. '
-                                          'Inicia sesión con tu contraseña y desde dentro '
-                                          'de la app podrás vincular Google.',
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context),
-                                            child: const Text('Entendido'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    CustomSnackBar.showSnackBar(
-                                      'Error al iniciar con Google',
-                                      context,
-                                      theme,
-                                    );
-                                  }
-                                } finally {
-                                  if (mounted) setState(() => buttonIsLoading = false);
+                              if (user != null) {
+                                if (context.mounted) {
+                                  CustomSnackBar.showSnackBar(
+                                    '¡Bienvenido!',
+                                    context,
+                                    theme,
+                                  );
+                                  Navigator.pushReplacementNamed(context, 'navigation');
                                 }
-                              },
+                              }
+                            } on FirebaseAuthException catch (e) {
+                              if (e.code == 'account-exists-with-different-credential') {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: const Text('Cuenta ya existente'),
+                                    content: const Text(
+                                      'Ya tienes una cuenta con ese correo. '
+                                      'Inicia sesión con tu contraseña y desde dentro '
+                                      'de la app podrás vincular Google.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Entendido'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                CustomSnackBar.showSnackBar(
+                                  'Error al iniciar con Google',
+                                  context,
+                                  theme,
+                                );
+                              }
+                            } finally {
+                              if (mounted) setState(() => buttonIsLoading = false);
+                            }
+                          },
+                        textTheme: theme.textTheme.titleMedium
                       ),
 
                       SizedBox(
