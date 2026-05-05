@@ -13,8 +13,8 @@ class CustomSnackBar {
         ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(
-          bottom: 20,
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height * 0.7,
           right: 20,
           left: 20,
         ),
