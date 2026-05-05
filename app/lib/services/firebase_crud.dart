@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-FirebaseFirestore db = FirebaseFirestore.instance;
+FirebaseFirestore usersDB = FirebaseFirestore.instance;
 
 Future<List<Map<String, dynamic>>> getUsers() async {
   List<Map<String, dynamic>> users = [];
 
-  QuerySnapshot query = await db
+  QuerySnapshot query = await usersDB
       .collection("Proyectos")
       .get();
 
@@ -24,7 +24,7 @@ Future<List<Map<String, dynamic>>> getUsers() async {
 }
 
 Future<DocumentSnapshot<Map<String, dynamic>>> getUser(String userId) async {
-  DocumentReference<Map<String, dynamic>> collectionReferenceUser = db.collection('Usuarios').doc(userId);
+  DocumentReference<Map<String, dynamic>> collectionReferenceUser = usersDB.collection('Usuarios').doc(userId);
 
   return await collectionReferenceUser.get();
 }
@@ -36,7 +36,7 @@ Future<void> insertUsuario(
   String? email, {
   bool vinculadoGoogle = false,
 }) async {
-  await db.collection("Usuarios").doc(uid).set({
+  await usersDB.collection("Usuarios").doc(uid).set({
     "name": name,
     "last_name": lastName,
     "email": email,
@@ -45,7 +45,7 @@ Future<void> insertUsuario(
 }
 
 Future<bool> checkEmailExists(String email) async {
-  QuerySnapshot query = await db
+  QuerySnapshot query = await usersDB
       .collection("Usuarios")
       .where("email", isEqualTo: email)
       .get();
@@ -53,7 +53,7 @@ Future<bool> checkEmailExists(String email) async {
 }
 
 Future<bool> isUserLinkedToGoogle(String email) async {
-  QuerySnapshot query = await db
+  QuerySnapshot query = await usersDB
       .collection("Usuarios")
       .where("email", isEqualTo: email)
       .get();
@@ -66,7 +66,7 @@ Future<bool> isUserLinkedToGoogle(String email) async {
 }
 
 Future<void> updateLinkStatus(String uid, bool status) async {
-  await db.collection("Usuarios").doc(uid).update({"vinculado_Google": status});
+  await usersDB.collection("Usuarios").doc(uid).update({"vinculado_Google": status});
 }
 
 Future<void> updateUser(
@@ -74,12 +74,12 @@ Future<void> updateUser(
   String? newName,
   String? newLastName,
 ) async {
-  await db.collection("Usuarios").doc(uid).set({
+  await usersDB.collection("Usuarios").doc(uid).update({
     if (newName != null) "name": newName,
     if (newLastName != null) "last_name": newLastName,
   });
 }
 
 Future<void> deleteUser(String uid) async {
-  await db.collection("Usuarios").doc(uid).delete();
+  await usersDB.collection("Usuarios").doc(uid).delete();
 }

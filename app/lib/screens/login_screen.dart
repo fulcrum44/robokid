@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:robokid/services/firebase_services.dart';
+import 'package:robokid/services/services.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
 
@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // Booleano para el icono para ver la contraseña
   bool obscureText = true;
   // BORRAR ?
-  bool mostrarBotones = false;
+  bool showButtons = false;
 
   final FirebaseServices firebaseServices = FirebaseServices();
 
@@ -165,11 +165,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                 try {
                                   //le decimos qie espero a ver si devuelve datos antes de poner el snabar y de qe te lleve a la pantalla
-                                  final usuario = await firebaseServices.login(
+                                  final user = await firebaseServices.login(
                                     email: email,
                                     password: password,
                                   );
-                                  if (usuario != null) {
+                                  if (user != null) {
                                     if (context.mounted) {
                                       CustomSnackBar.showSnackBar(
                                         '¡Bienvenido !',

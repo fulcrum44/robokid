@@ -1,31 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:robokid/providers/auth_provider.dart';
 import 'package:robokid/screens/screens.dart';
-import 'package:robokid/services/firebase_services.dart';
 
 class Wrapper extends StatelessWidget {
-   
-  const Wrapper({super.key});
-  
+  const Wrapper({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      body: StreamBuilder(stream: FirebaseServices.auth.authStateChanges(), builder:(context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator()
-          );
-        } else if (snapshot.hasError) {
-            return Center(
-              child: Text("Error")
-            );
-        } else {
-          if (snapshot.data == null) {
-            return LoginScreen();
-          } else {
-            return NavegationScreen();
-          }
-        }
-      },),
-    );
+    final auth = context.watch<AuthProvider>();
+
+    if (auth.isLoading) {
+      return Scaffold(body: CircularProgressIndicator());
+    }
+
+    return auth.user == null ? LoginScreen() : NavigationScreen();
   }
 }

@@ -1,22 +1,23 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
-import 'package:robokid/services/firebase_crud.dart';
+import 'package:provider/provider.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
-import 'package:robokid/services/firebase_services.dart';
+import 'package:robokid/services/services.dart';
+import 'package:robokid/providers/auth_provider.dart';
 import 'package:robokid/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AjustesScreen extends StatefulWidget {
-  const AjustesScreen({super.key});
+class ConfigScreen extends StatefulWidget {
+  const ConfigScreen({super.key});
 
   @override
-  State<AjustesScreen> createState() => _AjustesScreenState();
+  State<ConfigScreen> createState() => _ConfigScreenState();
 }
 
-class _AjustesScreenState extends State<AjustesScreen> {
-  final FirebaseServices _firebaseServices = FirebaseServices();
+class _ConfigScreenState extends State<ConfigScreen> {
   // Tema seleccionado, por defecto sigue el sistema
+  final FirebaseServices _firebaseServices = FirebaseServices();
   String _selectedTheme = 'system';
 
   // Nombre y apellido por separado para poder editarlos individualmente
@@ -30,7 +31,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
     _lastNameController = TextEditingController();
     // Cargamos el tema y el nombre al entrar a la pantalla
     _loadCurrentTheme();
-    _loadUserName();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserName();
+    });
   }
 
   // Leemos el tema guardado en el almacenamiento del teléfono
@@ -43,7 +47,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   // Partimos el displayName en nombre y apellido
   void _loadUserName() {
-    final user = FirebaseAuth.instance.currentUser;
+    final auth = context.read<AuthProvider>();
+    final user = auth.user;
+
     if (user?.displayName != null) {
       final parts = user!.displayName!.split(' ');
       _firstNameController.text = parts.isNotEmpty ? parts.first : '';
@@ -63,7 +69,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   // Guarda el nombre en Firebase y muestra confirmación
   Future<void> _saveSettings() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final auth = context.read<AuthProvider>();
+    final user = auth.user;
+
     final theme = Theme.of(context);
 
     try {
@@ -95,9 +103,12 @@ class _AjustesScreenState extends State<AjustesScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final user = FirebaseAuth.instance.currentUser;
+
+    final auth = context.watch<AuthProvider>(); 
+    final user = auth.user;
     // Si no hay usuario es que está en modo invitado
-    final bool isGuest = user == null;
+    final bool isGuest = auth.isGuest;
+
     final bool isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
@@ -137,7 +148,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   CustomRegisterButton(
                     theme: theme,
                     content: const Text("Iniciar sesión"),
-                    onPressed: () => Navigator.pushNamed(context, 'login'),
+                    onPressed: () => Navigator.pushNamedAndRemoveUntil(context, 'wrapper', (route) => false),
                   ),
                   const SizedBox(height: 10),
                   CustomRegisterButton(
@@ -166,11 +177,11 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     hintText: 'Email',
                     icon: Icons.email_outlined,
                     enabled: false,
-                    controller: TextEditingController(text: user.email),
+                    controller: TextEditingController(text: user?.email),
                   ),
                   const SizedBox(height: 15),
                   // Para vincular una cuenta Google a un usuario registrado con email
-                  if (!user.providerData.any(
+                        if (!user!.providerData.any(
                     (p) => p.providerId == 'google.com',
                   )) ...[
                     OutlinedButton.icon(

@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:robokid/widgets/custom_appbar.dart';
-import 'package:robokid/services/firebase_proyectos.dart';
+import 'package:robokid/widgets/widgets.dart';
+import 'package:robokid/services/services.dart';
+
+import '../providers/auth_provider.dart';
 
 class BlockScreen extends StatefulWidget {
   final String? proyectoId; // si viene un id, cargamos ese proyecto al abrir
@@ -17,17 +19,17 @@ class BlockScreen extends StatefulWidget {
 
 class _BlockScreenState extends State<BlockScreen> {
   late final WebViewController _controller;
-  bool _listo = false; // se pone en true cuando Blockly termina de cargar
-  String? _codigo; // último código Arduino generado
+  bool _loaded = false; // se pone en true cuando Blockly termina de cargar
+  String? _code; // último código Arduino generado
   String? _workspaceJson; // estado serializado del workspace (JSON)
-  String? _proyectoId; // id del proyecto actual (null si es nuevo)
-  String? _nombreProyecto; // nombre del proyecto actual
-  bool _guardando = false;
+  String? _projectId; // id del proyecto actual (null si es nuevo)
+  String? _projectName; // nombre del proyecto actual
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _proyectoId = widget.proyectoId;
+    _projectId = widget.proyectoId;
 
     // Configuramos el WebView para cargar el editor Blockly
     // FlutterChannel es el puente JS -> Dart
@@ -44,109 +46,113 @@ class _BlockScreenState extends State<BlockScreen> {
     // si el proyectoId cambió y Blockly ya está listo, cargamos el proyecto
     if (widget.proyectoId != null &&
         widget.proyectoId != oldWidget.proyectoId &&
-        _listo) {
-      _proyectoId = widget.proyectoId;
-      _cargarProyectoDesdeFirestore(_proyectoId!);
+        _loaded) {
+      _projectId = widget.proyectoId;
+      _firebaseProjectsLoad(_projectId!);
     }
   }
 
   // Recibe los mensajes que manda Blockly desde JavaScript
   void _onMensaje(JavaScriptMessage mensaje) {
-    final datos = jsonDecode(mensaje.message);
-    final tipo = datos['type'];
+    final data = jsonDecode(mensaje.message);
+    final tipo = data['type'];
 
     if (tipo == 'blocklyReady') {
-      setState(() => _listo = true);
+      setState(() => _loaded = true);
       // si venimos con un proyecto, lo cargamos ahora que Blockly esta listo
-      if (_proyectoId != null) {
-        _cargarProyectoDesdeFirestore(_proyectoId!);
+      if (_projectId != null) {
+        _firebaseProjectsLoad(_projectId!);
       }
     } else if (tipo == 'arduinoCode') {
-      setState(() => _codigo = datos['data']);
-      _mostrarCodigo();
+      setState(() => _code = data['data']);
+      _showCode();
     } else if (tipo == 'workspaceState') {
-      setState(() => _workspaceJson = datos['data']);
+      setState(() => _workspaceJson = data['data']);
       // si estamos en medio de un guardado, continuamos
-      if (_guardando) {
-        _guardando = false;
-        _completarGuardado();
+      if (_saving) {
+        _saving = false;
+        _completeSave();
       }
     }
   }
 
   // Le pide a Blockly que genere el código Arduino a partir de los bloques
-  void _compilar() {
+  void _compile() {
     _controller.runJavaScript('requestCode()');
   }
 
   // Pide el estado actual del workspace a Blockly (se recibe en _onMensaje)
-  void _pedirWorkspaceState() {
+  void _getWorkspaceState() {
     _controller.runJavaScript('requestWorkspaceState()');
   }
 
   // Carga un workspace guardado en el editor (recibe el JSON como string)
   // Usamos jsonEncode para escapar caracteres especiales antes de pasarlo a JS
-  Future<void> _cargarWorkspace(String workspaceJson) async {
+  Future<void> _loadWorkspace(String workspaceJson) async {
     final safe = jsonEncode(workspaceJson);
     await _controller.runJavaScript('loadWorkspace($safe)');
   }
 
   // Limpia todos los bloques del editor
-  Future<void> _limpiarWorkspace() async {
+  Future<void> _cleanWorkspace() async {
     await _controller.runJavaScript('clearWorkspace()');
     setState(() {
-      _codigo = null;
+      _code = null;
       _workspaceJson = null;
     });
   }
 
   // Carga un proyecto de Firestore y lo mete en el editor
-  Future<void> _cargarProyectoDesdeFirestore(String projectId) async {
+  Future<void> _firebaseProjectsLoad(String projectId) async {
     final proyecto = await getProyecto(projectId);
     if (proyecto != null && proyecto['workspaceJson'] != null) {
       setState(() {
-        _nombreProyecto = proyecto['nombre'];
-        _codigo = proyecto['codigoArduino'];
+        _projectName = proyecto['nombre'];
+        _code = proyecto['codigoArduino'];
       });
-      await _cargarWorkspace(proyecto['workspaceJson']);
+      await _loadWorkspace(proyecto['workspaceJson']);
     }
   }
 
   // Empieza el proceso de guardado: primero pide el workspace a Blockly
-  void _guardar() {
-    _guardando = true;
-    _pedirWorkspaceState();
+  void _save() {
+    _saving = true;
+    _getWorkspaceState();
     // cuando llegue el workspaceState en _onMensaje, se llama a _completarGuardado
   }
 
   // Se ejecuta cuando ya tenemos el workspaceJson actualizado
-  Future<void> _completarGuardado() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+  Future<void> _completeSave() async {
+    final auth = context.read<AuthProvider>();
+    final user = auth.user;
+
+    final uid = user?.uid;
+    
     if (uid == null || _workspaceJson == null) return;
 
     // si es un proyecto nuevo, pedimos el nombre
-    if (_proyectoId == null) {
-      final nombre = await _pedirNombreProyecto();
-      if (nombre == null || nombre.isEmpty) return;
+    if (_projectId == null) {
+      final name = await _getProjectName();
+      if (name == null || name.isEmpty) return;
 
       final id = await insertProyecto(
         uid,
-        nombre,
+        name,
         _workspaceJson!,
-        _codigo ?? '',
+        _code ?? '',
       );
       setState(() {
-        _proyectoId = id;
-        _nombreProyecto = nombre;
+        _projectId = id;
+        _projectName = name;
       });
     } else {
       // si ya existe, preguntamos si sobreescribir o crear uno nuevo
-      final opcion = await showDialog<String>(
+      final option = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Guardar proyecto'),
           content: Text(
-            '¿Quieres sobreescribir "$_nombreProyecto" o guardarlo como un nuevo proyecto?',
+            '¿Quieres sobreescribir "$_projectName" o guardarlo como un nuevo proyecto?',
           ),
           actions: [
             TextButton(
@@ -165,23 +171,23 @@ class _BlockScreenState extends State<BlockScreen> {
         ),
       );
 
-      if (opcion == null) return;
+      if (option == null) return;
 
-      if (opcion == 'sobreescribir') {
-        await updateProyecto(_proyectoId!, _workspaceJson!, _codigo ?? '');
+      if (option == 'sobreescribir') {
+        await updateProyecto(_projectId!, _workspaceJson!, _code ?? '');
       } else {
-        final nombre = await _pedirNombreProyecto();
-        if (nombre == null || nombre.isEmpty) return;
+        final name = await _getProjectName();
+        if (name == null || name.isEmpty) return;
 
         final id = await insertProyecto(
           uid,
-          nombre,
+          name,
           _workspaceJson!,
-          _codigo ?? '',
+          _code ?? '',
         );
         setState(() {
-          _proyectoId = id;
-          _nombreProyecto = nombre;
+          _projectId = id;
+          _projectName = name;
         });
       }
     }
@@ -198,7 +204,7 @@ class _BlockScreenState extends State<BlockScreen> {
   }
 
   // Dialogo para que el usuario ponga nombre al proyecto
-  Future<String?> _pedirNombreProyecto() async {
+  Future<String?> _getProjectName() async {
     final controller = TextEditingController();
     final theme = Theme.of(context);
 
@@ -237,11 +243,11 @@ class _BlockScreenState extends State<BlockScreen> {
   }
 
   // url del servidor de compilacion (cambiar segun donde este desplegado)
-  static const _servidorUrl = 'http://localhost:3000';
+  static const _urlServer = 'https://democrat-hence-safehouse.ngrok-free.dev';
 
   // Manda el código al servidor para compilarlo
   Future<void> _compilarYSubir() async {
-    if (_codigo == null || _codigo!.isEmpty) return;
+    if (_code == null || _code!.isEmpty) return;
 
     // mostramos que estamos compilando
     if (mounted) {
@@ -256,11 +262,11 @@ class _BlockScreenState extends State<BlockScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('$_servidorUrl/compile'),
+        Uri.parse('$_urlServer/compile'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'codigo': _codigo,
-          'placa': 'esp8266:esp8266:nodemcuv2',
+          'codigo': _code,
+          'placa': 'esp8266:esp8266:d1',
         }),
       );
 
@@ -277,7 +283,7 @@ class _BlockScreenState extends State<BlockScreen> {
         );
       } else {
         final error = jsonDecode(response.body);
-        _mostrarErrorCompilacion(
+        _showCompilingErrorMessage(
           error['detalle']?.toString() ?? 'Error desconocido',
         );
       }
@@ -295,7 +301,7 @@ class _BlockScreenState extends State<BlockScreen> {
   }
 
   // Muestra los errores de compilacion en un dialogo para que se lean bien
-  void _mostrarErrorCompilacion(String error) {
+  void _showCompilingErrorMessage(String error) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -317,8 +323,12 @@ class _BlockScreenState extends State<BlockScreen> {
   }
 
   // Muestra el código generado en un panel inferior
-  void _mostrarCodigo() {
+  void _showCode() {
     final theme = Theme.of(context);
+    final auth = context.read<AuthProvider>(); 
+    // Si no hay usuario es que está en modo invitado
+    final bool isGuest = auth.isGuest;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -344,8 +354,8 @@ class _BlockScreenState extends State<BlockScreen> {
                         icon: const Icon(Icons.copy),
                         tooltip: 'Copiar código',
                         onPressed: () {
-                          if (_codigo != null) {
-                            Clipboard.setData(ClipboardData(text: _codigo!));
+                          if (_code != null) {
+                            Clipboard.setData(ClipboardData(text: _code!));
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Código copiado'),
@@ -356,14 +366,17 @@ class _BlockScreenState extends State<BlockScreen> {
                           }
                         },
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.save),
-                        tooltip: 'Guardar proyecto',
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _guardar();
-                        },
-                      ),
+                      
+                      if (!isGuest)
+                        IconButton(
+                          icon: const Icon(Icons.save),
+                          tooltip: 'Guardar proyecto',
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _save();
+                          },
+                        ),
+
                       IconButton(
                         icon: const Icon(Icons.upload),
                         tooltip: 'Compilar y subir',
@@ -384,7 +397,7 @@ class _BlockScreenState extends State<BlockScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   child: SelectableText(
-                    _codigo ?? '',
+                    _code ?? '',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontFamily: 'monospace',
                       fontSize: 13,
@@ -401,6 +414,10 @@ class _BlockScreenState extends State<BlockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>(); 
+    // Si no hay usuario es que está en modo invitado
+    final bool isGuest = auth.isGuest;
+
     return Scaffold(
       appBar: CustomAppBar(),
       body: Column(
@@ -414,24 +431,28 @@ class _BlockScreenState extends State<BlockScreen> {
                 // boton para limpiar el workspace
                 FloatingActionButton(
                   heroTag: 'limpiar',
-                  onPressed: _listo ? _limpiarWorkspace : null,
-                  backgroundColor: _listo ? null : Colors.grey,
+                  onPressed: _loaded ? _cleanWorkspace : null,
+                  backgroundColor: _loaded ? null : Colors.grey,
                   child: const Icon(Icons.delete_outline),
                 ),
                 const SizedBox(width: 12),
+
                 // boton para guardar el proyecto
-                FloatingActionButton(
-                  heroTag: 'guardar',
-                  onPressed: _listo ? _guardar : null,
-                  backgroundColor: _listo ? null : Colors.grey,
-                  child: const Icon(Icons.save),
-                ),
-                const SizedBox(width: 12),
+                if (!isGuest)
+                  FloatingActionButton(
+                    heroTag: 'guardar',
+                    onPressed: _loaded ? _save : null,
+                    backgroundColor: _loaded ? null : Colors.grey,
+                    child: const Icon(Icons.save),
+                  ),
+                
+                if (!isGuest) const SizedBox(width: 12),
+
                 // boton para compilar (generar codigo arduino)
                 FloatingActionButton(
                   heroTag: 'compilar',
-                  onPressed: _listo ? _compilar : null,
-                  backgroundColor: _listo ? null : Colors.grey,
+                  onPressed: _loaded ? _compile : null,
+                  backgroundColor: _loaded ? null : Colors.grey,
                   child: const Icon(Icons.play_arrow),
                 ),
               ],

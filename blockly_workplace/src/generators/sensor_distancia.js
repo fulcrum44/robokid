@@ -1,6 +1,6 @@
 import { arduinoGenerator } from './arduino_generator.js';
 
-arduinoGenerator['leer_distancia'] = function() {
+arduinoGenerator.forBlock['leer_distancia'] = function() {
 
   // añadimos los include de la librería del sensor
   arduinoGenerator.definitions_['include_newping'] = '#include <NewPing.h>';
@@ -12,7 +12,7 @@ arduinoGenerator['leer_distancia'] = function() {
   return ['sonar.ping_cm()', arduinoGenerator.ORDER_ATOMIC];
 };
 
-arduinoGenerator['detectar_obstaculo'] = function(block) {
+arduinoGenerator.forBlock['detectar_obstaculo'] = function(block) {
   const distancia = block.getFieldValue('DISTANCIA');
 
   arduinoGenerator.definitions_['include_newping'] = '#include <NewPing.h>';

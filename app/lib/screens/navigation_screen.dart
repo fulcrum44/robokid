@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:robokid/screens/screens.dart';
 
-class NavegationScreen extends StatefulWidget {
-  const NavegationScreen({super.key});
+import '../providers/auth_provider.dart';
+
+class NavigationScreen extends StatefulWidget {
+  const NavigationScreen({super.key});
 
   @override
-  State<NavegationScreen> createState() => _NavegationScreenState();
+  State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
-class _NavegationScreenState extends State<NavegationScreen> {
+class _NavigationScreenState extends State<NavigationScreen> {
   int _selectedIndex = 0;
-  String? _proyectoId; // id del proyecto que se va a abrir en BlockScreen
+  String? _projectId; // id del proyecto que se va a abrir en BlockScreen
   final _recordKey = GlobalKey<RecordScreenState>();
 
   // cuando el usuario toca un proyecto en el historial, cambiamos a la tab de bloques
-  void _abrirProyecto(String proyectoId) {
+  void _openProject(String proyectoId) {
     setState(() {
-      _proyectoId = proyectoId;
+      _projectId = proyectoId;
       _selectedIndex = 0; // vamos a la tab de bloques
     });
   }
@@ -24,11 +27,11 @@ class _NavegationScreenState extends State<NavegationScreen> {
   void _onItemTapped(int index) {
     // si cambiamos de tab manualmente, limpiamos el proyecto para no recargarlo
     if (index != 0) {
-      _proyectoId = null;
+      _projectId = null;
     }
     // si vamos al historial, recargamos los proyectos
     if (index == 1) {
-      _recordKey.currentState?.recargar();
+      _recordKey.currentState?.reload();
     }
     setState(() {
       _selectedIndex = index;
@@ -42,11 +45,15 @@ class _NavegationScreenState extends State<NavegationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>(); 
+    // Si no hay usuario es que está en modo invitado
+    final bool isGuest = auth.isGuest;
+
     // no usamos const porque BlockScreen cambia segun el proyecto
     final screens = <Widget>[
-      BlockScreen(proyectoId: _proyectoId),
-      RecordScreen(key: _recordKey, onAbrirProyecto: _abrirProyecto),
-      const AjustesScreen(),
+      BlockScreen(proyectoId: _projectId),
+      if (!isGuest) RecordScreen(key: _recordKey, onOpenProject: _openProject),
+      const ConfigScreen(),
     ];
 
     return Scaffold(
@@ -59,10 +66,13 @@ class _NavegationScreenState extends State<NavegationScreen> {
             icon: Icon(Icons.widgets_outlined),
             label: 'Bloques',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            label: 'Historial',
-          ),
+          
+          if (!isGuest)
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history_outlined),
+              label: 'Historial',
+            ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
             label: 'Ajustes',
