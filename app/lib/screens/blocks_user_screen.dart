@@ -270,8 +270,14 @@ class _BlockScreenState extends State<BlockScreen> {
     try {
       final response = await http.post(
         Uri.parse('$_urlServer/compile'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'codigo': _code, 'placa': 'esp8266:esp8266:d1'}),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer robokid-token-2026',
+        },
+        body: jsonEncode({
+          'codigo': _code,
+          'placa': 'esp8266:esp8266:d1',
+        }),
       );
 
       if (!mounted) return;
