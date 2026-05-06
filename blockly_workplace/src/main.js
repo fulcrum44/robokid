@@ -7,9 +7,9 @@ import { leerDistancia, detectarObstaculo } from './blocks/sensor.js';
 import { moverMotorGrados } from './blocks/motor_grados.js';
 import { esperarSegundos } from './blocks/tiempo.js';
 
-import './generators/sensor_distancia.js';
-import './generators/motores.js';
-import './generators/tiempo.js';
+import './generators/matematicas.js'
+import './generators/control.js'
+import './generators/robot.js'
 
 Blockly.common.defineBlocksWithJsonArray([
   moverRobot, 
