@@ -20,26 +20,31 @@ Blockly.common.defineBlocksWithJsonArray([
   esperarSegundos
 ]);
 
-const temaClaro = Blockly.Theme.defineTheme('claro', {
-  name: 'claro',
+const temaClaro = Blockly.Theme.defineTheme('robokid-light', {
   base: Blockly.Themes.Classic,
-
-  // Aspecto toolbox
+  fontStyle: { family: 'Outfit', weight: '500', size: 12 },
   componentStyles: {
-    toolboxBackgroundColour: '#2D2D2D',     // fondo oscuro del panel
-    toolboxForegroundColour: '#FFFFFF',     // texto de categorías
-    flyoutBackgroundColour: '#3D3D3D',      // fondo del desplegable
-    flyoutForegroundColour: '#FFFFFF',      // texto dentro del desplegable
+    workspaceBackgroundColour: '#f5f5f8',
+    toolboxBackgroundColour: '#3f3e3e',
+    toolboxForegroundColour: '#ffffff',
+    flyoutBackgroundColour: '#16213e',
+    flyoutForegroundColour: '#ffffff',
     flyoutOpacity: 0.95,
-    scrollbarColour: '#555555',
-    insertionMarkerColour: '#FFFFFF',
-    insertionMarkerOpacity: 0.3,
+    scrollbarColour: 'rgb(85, 84, 84)',
   },
+});
 
-  // Fuente visualmente más atrayente para niños
-  fontStyle: {
-    family: 'Fredoka One, cursive',
-    size: 13,
+const temaOscuro = Blockly.Theme.defineTheme('robokid-dark', {
+  base: Blockly.Themes.Classic,
+  fontStyle: { family: 'Outfit', weight: '500', size: 12 },
+  componentStyles: {
+    workspaceBackgroundColour: '#242424',
+    toolboxBackgroundColour: '#3f3e3e',
+    toolboxForegroundColour: '#ffffff',
+    flyoutBackgroundColour: '#151528',
+    flyoutForegroundColour: '#ffffff',
+    flyoutOpacity: 0.95,
+    scrollbarColour: 'rgba(238, 237, 237, 0.81)',
   },
 });
 
@@ -48,74 +53,54 @@ const workspace = Blockly.inject('blocklyDiv', {
     kind: 'categoryToolbox',
     contents: [
       {
-        kind: 'category',
-        name: '🚗 Movimiento',
-        colour: '#FF6B35',
+        kind: 'category', name: 'Movimiento', colour: '#FF6B35',
         contents: [
           { kind: 'block', type: 'mover_motores' },
           { kind: 'block', type: 'cambiar_velocidad' },
-        ]
-      },
-      {
-        kind: 'category',
-        name: '⚙️ Servo',
-        colour: '#9B59B6',
-        contents: [
           { kind: 'block', type: 'mover_motor_grados' },
         ]
       },
       {
-        kind: 'category',
-        name: '👁️ Sensores',
-        colour: '#00BCD4',
+        kind: 'category', name: 'Sensor', colour: '#00BCD4',
         contents: [
           { kind: 'block', type: 'leer_distancia' },
           { kind: 'block', type: 'detectar_obstaculo' },
         ]
       },
       {
-        kind: 'category',
-        name: '⏱️ Tiempo',
-        colour: '#FF4081',
+        kind: 'category', name: 'Tiempo', colour: '#FF4081',
         contents: [
           { kind: 'block', type: 'esperar_segundos' },
         ]
       },
       {
-        kind: 'category',
-        name: '🔁 Control',
-        colour: '#4CAF50',
+        kind: 'category', name: 'Control', colour: '#4CAF50',
         contents: [
           { kind: 'block', type: 'controls_if' },
           { kind: 'block', type: 'controls_repeat_ext' },
         ]
       },
       {
-        kind: 'category',
-        name: '🔢 Matemáticas',
-        colour: '#FFC107',
+        kind: 'category', name: 'Matemáticas', colour: '#FFC107',
         contents: [
           { kind: 'block', type: 'math_number' },
+          { kind: 'block', type: 'math_arithmetic' },
         ]
       },
     ]
   },
+
   theme: temaClaro,
-  scrollbars: true,
+  horizontalLayout: true,
+  toolboxPosition: 'start',
   trashcan: true,
   zoom: {
-    controls: true,
-    wheel: true,
-    startScale: 1.0,
-    maxScale: 2,
-    minScale: 0.5,
+    controls: true, wheel: true,
+    startScale: 0.7, maxScale: 1.5, minScale: 0.3, scaleSpeed: 1.1,
   },
-  grid: {
-    spacing: 24,
-    length: 4,
-    colour: '#444',
-    snap: true,
-  },
+  grid: { spacing: 25, length: 3, colour: '#777777', snap: true },
+  move: { scrollbars: true, drag: true, wheel: true },
+  renderer: 'zelos',
 });
 
 // exponer workspace para acceso desde el webview
@@ -155,3 +140,22 @@ try {
 } catch (e) {
   console.log('Blockly listo (sin FlutterChannel)');
 }
+
+
+// funcion para cambiar el tema del workspace según ajustes de la app
+window.setBlocklyTheme = function(mode) {
+  if (mode === 'dark') {
+    document.body.classList.add('dark-theme');
+    workspace.setTheme(temaOscuro);
+  } else {
+    document.body.classList.remove('dark-theme');
+    workspace.setTheme(temaClaro);
+  }
+
+  const gridPattern = workspace.getParentSvg().querySelector('.blocklyGridPattern');
+  if (gridPattern) {
+    const lines = gridPattern.querySelectorAll('line');
+    const color = mode === 'dark' ? '#f1f1f1' : '#777777';
+    lines.forEach(line => line.setAttribute('stroke', color));
+  }
+};
