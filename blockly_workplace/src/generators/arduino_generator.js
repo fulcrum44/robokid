@@ -36,11 +36,11 @@ arduinoGenerator.finish = function(code) {
 
 void setup() {
   configurarOTA();
-  esperarOTA();
   ${setups}
 }
 
 void loop() {
+  otaServer.handleClient();
   ${code}
 }
 `;
