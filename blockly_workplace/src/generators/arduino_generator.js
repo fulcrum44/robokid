@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly';
+import OTA_TEMPLATE from '../../../firmware/ota_bootloader.ino?raw';
 
 export const arduinoGenerator = new Blockly.Generator('Arduino');
 
@@ -30,9 +31,12 @@ arduinoGenerator.scrub_ = function(block, code, thisOnly) {
 arduinoGenerator.finish = function(code) {
   const includes = Object.values(this.definitions_).join('\n');
   const setups   = Object.values(this.setups_).join('\n  ');
-  return `${includes}
+  return `${OTA_TEMPLATE}
+  ${includes}
 
 void setup() {
+  configurarOTA();
+  esperarOTA();
   ${setups}
 }
 
