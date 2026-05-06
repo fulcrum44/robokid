@@ -18,6 +18,14 @@ arduinoGenerator.init = function(workspace) {
   Object.getPrototypeOf(arduinoGenerator).init.call(this, workspace);
 };
 
+arduinoGenerator.scrub_ = function(block, code, thisOnly) {
+  const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
+  if (nextBlock && !thisOnly) {
+    return code + this.blockToCode(nextBlock);
+  }
+  return code;
+};
+
 // ensamblado de los bloques en un sketch unificado
 arduinoGenerator.finish = function(code) {
   const includes = Object.values(this.definitions_).join('\n');
