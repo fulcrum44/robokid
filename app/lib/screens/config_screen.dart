@@ -9,7 +9,10 @@ import 'package:robokid/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigScreen extends StatefulWidget {
-  const ConfigScreen({super.key});
+  final String? temaActual;
+  final void Function(String themeMode)? onChangeThemeMode;
+
+  const ConfigScreen({super.key, this.temaActual, this.onChangeThemeMode});
 
   @override
   State<ConfigScreen> createState() => _ConfigScreenState();
@@ -288,6 +291,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   onChanged: (value) {
                     setState(() => _selectedTheme = value!);
                     _updateAppTheme(value!);
+                    widget.onChangeThemeMode!.call(value);
                   },
                 ),
               ],

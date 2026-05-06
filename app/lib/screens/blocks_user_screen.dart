@@ -10,8 +10,10 @@ import 'package:robokid/services/services.dart';
 import '../providers/auth_provider.dart';
 
 class BlockScreen extends StatefulWidget {
-  final String? proyectoId; // si viene un id, cargamos ese proyecto al abrir
-  const BlockScreen({super.key, this.proyectoId});
+  final String? projectId; // si viene un id, cargamos ese proyecto al abrir
+  final String? themeMode;
+
+  const BlockScreen({super.key, this.projectId, this.themeMode});
 
   @override
   State<BlockScreen> createState() => _BlockScreenState();
@@ -29,7 +31,7 @@ class _BlockScreenState extends State<BlockScreen> {
   @override
   void initState() {
     super.initState();
-    _projectId = widget.proyectoId;
+    _projectId = widget.projectId;
 
     // Configuramos el WebView para cargar el editor Blockly
     // FlutterChannel es el puente JS -> Dart
@@ -44,11 +46,15 @@ class _BlockScreenState extends State<BlockScreen> {
   void didUpdateWidget(covariant BlockScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     // si el proyectoId cambió y Blockly ya está listo, cargamos el proyecto
-    if (widget.proyectoId != null &&
-        widget.proyectoId != oldWidget.proyectoId &&
+    if (widget.projectId != null &&
+        widget.projectId != oldWidget.projectId &&
         _loaded) {
-      _projectId = widget.proyectoId;
+      _projectId = widget.projectId;
       _firebaseProjectsLoad(_projectId!);
+    }
+
+    if (widget.themeMode != null && widget.themeMode != oldWidget.themeMode && _loaded) {
+      _controller.runJavaScript("setBlocklyTheme('${widget.themeMode}')");
     }
   }
 
@@ -59,6 +65,12 @@ class _BlockScreenState extends State<BlockScreen> {
 
     if (tipo == 'blocklyReady') {
       setState(() => _loaded = true);
+
+      // aplicamos el tema actual de la app
+      if (widget.themeMode != null) {
+        _controller.runJavaScript("setBlocklyTheme('${widget.themeMode}')");
+      }
+
       // si venimos con un proyecto, lo cargamos ahora que Blockly esta listo
       if (_projectId != null) {
         _firebaseProjectsLoad(_projectId!);
@@ -127,7 +139,7 @@ class _BlockScreenState extends State<BlockScreen> {
     final user = auth.user;
 
     final uid = user?.uid;
-    
+
     if (uid == null || _workspaceJson == null) return;
 
     // si es un proyecto nuevo, pedimos el nombre
@@ -135,12 +147,7 @@ class _BlockScreenState extends State<BlockScreen> {
       final name = await _getProjectName();
       if (name == null || name.isEmpty) return;
 
-      final id = await insertProyecto(
-        uid,
-        name,
-        _workspaceJson!,
-        _code ?? '',
-      );
+      final id = await insertProyecto(uid, name, _workspaceJson!, _code ?? '');
       setState(() {
         _projectId = id;
         _projectName = name;
@@ -264,10 +271,7 @@ class _BlockScreenState extends State<BlockScreen> {
       final response = await http.post(
         Uri.parse('$_urlServer/compile'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'codigo': _code,
-          'placa': 'esp8266:esp8266:d1',
-        }),
+        body: jsonEncode({'codigo': _code, 'placa': 'esp8266:esp8266:d1'}),
       );
 
       if (!mounted) return;
@@ -325,7 +329,7 @@ class _BlockScreenState extends State<BlockScreen> {
   // Muestra el código generado en un panel inferior
   void _showCode() {
     final theme = Theme.of(context);
-    final auth = context.read<AuthProvider>(); 
+    final auth = context.read<AuthProvider>();
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
@@ -366,7 +370,7 @@ class _BlockScreenState extends State<BlockScreen> {
                           }
                         },
                       ),
-                      
+
                       if (!isGuest)
                         IconButton(
                           icon: const Icon(Icons.save),
@@ -414,7 +418,7 @@ class _BlockScreenState extends State<BlockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>(); 
+    final auth = context.watch<AuthProvider>();
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
@@ -445,7 +449,7 @@ class _BlockScreenState extends State<BlockScreen> {
                     backgroundColor: _loaded ? null : Colors.grey,
                     child: const Icon(Icons.save),
                   ),
-                
+
                 if (!isGuest) const SizedBox(width: 12),
 
                 // boton para compilar (generar codigo arduino)

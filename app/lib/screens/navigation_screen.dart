@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:robokid/screens/screens.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/auth_provider.dart';
 
@@ -14,6 +15,7 @@ class NavigationScreen extends StatefulWidget {
 class _NavigationScreenState extends State<NavigationScreen> {
   int _selectedIndex = 0;
   String? _projectId; // id del proyecto que se va a abrir en BlockScreen
+  String _themeMode = 'system';
   final _recordKey = GlobalKey<RecordScreenState>();
 
   // cuando el usuario toca un proyecto en el historial, cambiamos a la tab de bloques
@@ -22,6 +24,30 @@ class _NavigationScreenState extends State<NavigationScreen> {
       _projectId = proyectoId;
       _selectedIndex = 0; // vamos a la tab de bloques
     });
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _themeMode = prefs.getString('theme_mode') ?? 'system';
+    });
+  }
+
+  Future<void> _changeThemeMode(String mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('theme_mode', mode);
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
+  // Resuelve 'system' al tema real
+  String _systemTheme(BuildContext context) {
+    if (_themeMode == 'system') {
+      final brightness = MediaQuery.platformBrightnessOf(context);
+      return brightness == Brightness.dark ? 'dark' : 'light';
+    }
+    return _themeMode;
   }
 
   void _onItemTapped(int index) {
@@ -49,11 +75,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
+    final theme = _systemTheme(context);
+
     // no usamos const porque BlockScreen cambia segun el proyecto
     final screens = <Widget>[
-      BlockScreen(proyectoId: _projectId),
+      BlockScreen(projectId: _projectId, themeMode: theme),
       if (!isGuest) RecordScreen(key: _recordKey, onOpenProject: _openProject),
-      const ConfigScreen(),
+      ConfigScreen(onChangeThemeMode: _changeThemeMode,  temaActual: _themeMode),
     ];
 
     return Scaffold(
