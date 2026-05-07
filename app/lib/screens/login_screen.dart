@@ -20,8 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   // Booleano para el icono para ver la contraseña
   bool obscureText = true;
 
-  final FirebaseServices firebaseServices = FirebaseServices();
-
   @override
   void initState() {
     super.initState();
