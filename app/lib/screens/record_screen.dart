@@ -50,6 +50,7 @@ class RecordScreenState extends State<RecordScreen> {
       builder: (context) {
         final theme = Theme.of(context);
         return AlertDialog(
+          backgroundColor: theme.scaffoldBackgroundColor,
           title: Text(
             project['nombre'] ?? 'Sin nombre',
             style: theme.textTheme.titleLarge?.copyWith(

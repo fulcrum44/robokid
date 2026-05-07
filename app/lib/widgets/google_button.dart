@@ -5,13 +5,11 @@ class GoogleButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final TextStyle? textTheme;
 
-  const GoogleButton({Key? key, required this.screen, this.onPressed, required this.textTheme})
-    : super(key: key);
+  const GoogleButton({super.key, required this.screen, this.onPressed, required this.textTheme});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
+    final theme = Theme.of(context);
     return OutlinedButton.icon(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
@@ -20,14 +18,14 @@ class GoogleButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
         ),
       ),
-      icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.red),
+      icon: const Icon(Icons.g_mobiledata_rounded, size: 28, color: Colors.red),
       label: Text(
         (screen == 'signup')
             ? 'Registrarse con Google'
             : ((screen == 'login')
                   ? 'Iniciar sesión con Google'
                   : 'Vincular cuenta Google'),
-        style: textTheme,
+        style: theme.textTheme.titleMedium,
       ),
     );
   }

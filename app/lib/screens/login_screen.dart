@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                  color: containerBorder,
+                                  color: Colors.white,
                                   strokeWidth: 2,
                                 ),
                               )
@@ -263,11 +263,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    title: const Text('Cuenta ya existente'),
-                                    content: const Text(
+                                    backgroundColor: theme.scaffoldBackgroundColor,
+                                    title: Text('Cuenta ya existente', style: theme.textTheme.titleLarge,),
+                                    content: Text(
                                       'Ya tienes una cuenta con ese correo. '
                                       'Inicia sesión con tu contraseña y desde dentro '
                                       'de la app podrás vincular Google.',
+                                      style: theme.textTheme.titleMedium,
                                     ),
                                     actions: [
                                       TextButton(

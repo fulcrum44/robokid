@@ -121,10 +121,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
             Text(
               'Configuración',
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 32,
-                color: AppTheme.primaryText(isDark),
-              ),
+              style: theme.textTheme.titleLarge
             ),
             const SizedBox(height: 20),
 
@@ -138,10 +135,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   // Avisamos al invitado de que no tiene sesión
                   Text(
                     "No has iniciado sesión. Regístrate para guardar tus proyectos en la nube.",
-                    style: TextStyle(
-                      color: AppTheme.secondaryText(isDark),
-                      fontSize: 14,
-                    ),
+                    style: theme.textTheme.titleMedium
                   ),
                   const SizedBox(height: 15),
                   // Navegamos a login o registro según lo que elija
@@ -206,15 +200,17 @@ class _ConfigScreenState extends State<ConfigScreen> {
                             setState(
                               () {},
                             );
-
-                            CustomSnackBar.showSnackBar(
+                          if(context.mounted){
+                             CustomSnackBar.showSnackBar(
                               "Cuenta vinculada con éxito",
                               context,
                               theme,
                             );
                           }
+                           
+                          }
                         } on FirebaseAuthException catch (e) {
-                          if (mounted) {
+                          if (context.mounted) {
                             CustomSnackBar.showSnackBar(
                               e.code == 'credential-already-in-use'
                                   ? 'Esta cuenta de Google ya está en uso por otro usuario'
@@ -307,12 +303,11 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   ),
                 ),
                 onPressed: _saveSettings,
-                child: const Text(
+                child: Text(
                   "GUARDAR CAMBIOS",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.white
+                  )
                 ),
               ),
             ),
@@ -325,6 +320,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
 
   // Guarda el tema en SharedPreferences y lo aplica
   void _updateAppTheme(String mode) async {
+    final theme = Theme.of(context);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('theme', mode);
 
@@ -336,7 +332,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
       CustomSnackBar.showSnackBar(
         "Sincronizado con el sistema",
         context,
-        Theme.of(context),
+        theme,
       );
     }
   }
@@ -372,11 +368,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: AppTheme.primaryText(isDark),
-                ),
+                style: theme.textTheme.titleMedium
               ),
             ],
           ),
@@ -389,6 +381,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
 
   // Fondo transparente para que se vea igual en claro y oscuro
   Widget _buildActionList() {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
         color: Colors.transparent,
@@ -396,12 +389,12 @@ class _ConfigScreenState extends State<ConfigScreen> {
       ),
       child: ListTile(
         leading: const Icon(Icons.logout, color: Colors.redAccent),
-        title: const Text(
+        title: Text(
           "Cerrar Sesión",
-          style: TextStyle(
-            color: Colors.redAccent,
-            fontWeight: FontWeight.bold,
-          ),
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: Colors.red,
+            fontWeight: FontWeight.bold
+          )
         ),
         onTap: () async {
           // Mostramos diálogo de carga
@@ -409,7 +402,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
             context: context,
             barrierDismissible: false,
             builder: (context) =>
-                const Center(child: CircularProgressIndicator()),
+            const Center(child: CircularProgressIndicator()),
           );
 
           try {

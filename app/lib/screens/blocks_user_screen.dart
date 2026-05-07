@@ -216,7 +216,6 @@ class _BlockScreenState extends State<BlockScreen> {
   // Dialogo para que el usuario ponga nombre al proyecto
   Future<String?> _getProjectName() async {
     final controller = TextEditingController();
-    final theme = Theme.of(context);
 
     return showDialog<String>(
       context: context,
@@ -226,11 +225,7 @@ class _BlockScreenState extends State<BlockScreen> {
           backgroundColor: theme.scaffoldBackgroundColor,
           title: Text(
             'Nombre del proyecto',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
-            ),
+            style: theme.textTheme.titleLarge
           ),
           content: TextField(
             controller: controller,
@@ -374,8 +369,8 @@ class _BlockScreenState extends State<BlockScreen> {
                           if (_code != null) {
                             Clipboard.setData(ClipboardData(text: _code!));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Código copiado'),
+                               SnackBar(
+                                content: Text('Código copiado', style: theme.textTheme.titleMedium,),
                                 duration: Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -415,10 +410,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 child: SingleChildScrollView(
                   child: SelectableText(
                     _code ?? '',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontFamily: 'monospace',
-                      fontSize: 13,
-                    ),
+                    style: theme.textTheme.titleSmall,
                   ),
                 ),
               ),

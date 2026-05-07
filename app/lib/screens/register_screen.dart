@@ -144,7 +144,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                     ? SizedBox(
                         height: MediaQuery.of(context).size.height * 0.0225,
                         width: MediaQuery.of(context).size.height * 0.0225,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
                     : Text('Registrarse', style: theme.textTheme.titleMedium),
                 // El botón se deshabilia si la panalla está cargando
@@ -272,11 +272,13 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
                         showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                            title: const Text('Cuenta ya existente'),
-                            content: const Text(
+                            backgroundColor: theme.scaffoldBackgroundColor,
+                            title: Text('Cuenta ya existente', style: theme.textTheme.titleLarge,),
+                            content: Text(
                               'Ya tienes una cuenta con ese correo. '
                               'Inicia sesión con tu contraseña y desde dentro '
                               'de la app podrás vincular Google.',
+                              style: theme.textTheme.titleMedium,
                             ),
                             actions: [
                               TextButton(
