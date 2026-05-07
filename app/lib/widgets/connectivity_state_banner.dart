@@ -9,7 +9,7 @@ class ConnectivityBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final conn = context.watch<ConnectivityProvider>();
 
-    if (conn.hasInternet) return const SizedBox.shrink();
+    if (!conn.initialized || conn.hasInternet) return const SizedBox.shrink();
 
     final isRobot = conn.isOnRobotWifi;
 

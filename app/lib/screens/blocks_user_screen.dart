@@ -313,7 +313,7 @@ class _BlockScreenState extends State<BlockScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Compilación exitosa — pulsa ENVIAR para flashear',
+              'Compilación exitosa — Desactiva los datos móviles y pulsa ENVIAR para flashear',
               style: theme.textTheme.titleMedium,
             ),
             duration: Duration(seconds: 2),

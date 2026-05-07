@@ -20,6 +20,10 @@ class ConnectivityProvider extends ChangeNotifier {
   bool get hasInternet => _state == AppConnectionState.online;
   bool get isOnRobotWifi => _state == AppConnectionState.robotWifi;
   bool get isOffile => _state == AppConnectionState.offline;
+
+  // Con este flag controloamos cuando aparece el banner que indica si no hay conexión a internet o estamos conectados al robot.
+  bool _initialized = false;
+  bool get initialized => _initialized;
   
   ConnectivityProvider() {
     _init();
@@ -38,21 +42,20 @@ class ConnectivityProvider extends ChangeNotifier {
     if (result.contains(ConnectivityResult.none) || result.isEmpty) {
       _updateState(AppConnectionState.offline);
       return;
-    }
-
-    // Comprobar si estamos en la red que hemos configurado para el robot (192.168.4.1)
-    if (await _isRobotReachable()) {
+    } else if (await _isRobotReachable()) { // Comprobamos si estamos en la red que hemos configurado para el robot (192.168.4.1)
       _updateState(AppConnectionState.robotWifi);
       return;
-    }
-
-    // Comprobar si hay internet real
-    if (await _hasRealInternet()) {
+    } else if (await _hasRealInternet()) { // Comprobamos si hay internet real
       _updateState(AppConnectionState.online);
       return;
+    } else {
+      _updateState(AppConnectionState.offline);
     }
 
-    _updateState(AppConnectionState.offline);
+    if (!_initialized) {
+      _initialized = true;
+      notifyListeners();
+    }
   }
 
   Future<bool> _isRobotReachable() async {
