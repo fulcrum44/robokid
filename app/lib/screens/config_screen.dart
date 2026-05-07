@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:robokid/theme/app_theme.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
-import 'package:robokid/providers/auth_provider.dart';
+import 'package:robokid/providers/providers.dart';
 import 'package:robokid/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -10,7 +10,7 @@ import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
 import 'dart:typed_data';
 
-import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 
 class BlockScreen extends StatefulWidget {
   final String? projectId; // si viene un id, cargamos ese proyecto al abrir
@@ -270,6 +270,17 @@ class _BlockScreenState extends State<BlockScreen> {
     final theme = Theme.of(context);
     if (_code == null || _code!.isEmpty) return;
 
+    final conn = context.read<ConnectivityProvider>();
+    
+    if (!conn.hasInternet) {
+      CustomSnackBar.showSnackBar(
+        'Es necesario estar conectado a internet para compilar',
+        context,
+        theme
+      );
+      return;
+    }
+
     // mostramos que estamos compilando
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -448,10 +459,13 @@ class _BlockScreenState extends State<BlockScreen> {
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
+    final conn = context.watch<ConnectivityProvider>();
+
     return Scaffold(
       appBar: CustomAppBar(),
       body: Column(
         children: [
+          const ConnectivityBanner(),
           Expanded(child: WebViewWidget(controller: _controller)),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -470,7 +484,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 if (!isGuest)
                   ElevatedButton(
                     key: Key('guardar'),
-                    onPressed: _loaded ? _save : null,
+                    onPressed: _loaded && conn.hasInternet ? _save : null,
                     child: const Icon(Icons.save),
                   ),
 
@@ -489,8 +503,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 FloatingActionButton.extended(
                   heroTag: 'enviar',
                   onPressed:
-                      _firmwareBytes !=
-                          null // solo activo si hay .bin
+                      _firmwareBytes != null && conn.isOnRobotWifi // solo activo si hay .bin y estamos conectados al robot
                       ? () => Navigator.push(
                           context,
                           MaterialPageRoute(

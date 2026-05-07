@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:robokid/providers/providers.dart';
 
 class SendScreen extends StatefulWidget {
   final Uint8List firmwareBytes;
@@ -25,6 +27,15 @@ class _SendScreenState extends State<SendScreen> {
 
   String _log = "";
   bool _uploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ConnectivityProvider>().refresh();
+    });
+  }
 
   Future<void> _uploadFirmware() async {
     setState(() {
@@ -83,6 +94,8 @@ class _SendScreenState extends State<SendScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final conn = context.watch<ConnectivityProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("OTA Flasher – ESP8266"),
@@ -117,7 +130,7 @@ class _SendScreenState extends State<SendScreen> {
             const SizedBox(height: 16),
 
             FilledButton.icon(
-              onPressed: !_uploading ? _uploadFirmware : null,
+              onPressed: !_uploading && conn.isOnRobotWifi ? _uploadFirmware : null,
               icon: _uploading
                   ? const SizedBox(
                       width: 18,
@@ -127,7 +140,7 @@ class _SendScreenState extends State<SendScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(Icons.upload),
+                  : Icon(conn.isOnRobotWifi ? Icons.upload : Icons.wifi_find),
               label: Text(_uploading ? "Flasheando…" : "Flashear por OTA"),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),

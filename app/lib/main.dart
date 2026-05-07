@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:robokid/providers/auth_provider.dart';
+import 'package:robokid/providers/providers.dart';
 import 'package:robokid/routes/app_routes.dart';
 import 'package:robokid/config/firebase_options.dart';
 import 'package:robokid/theme/app_theme.dart';
@@ -23,13 +23,13 @@ void main() async {
   else initialMode = ThemeMode.system;
   
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
-      child: MyApp(
-        initialTheme: initialMode
-      )
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ConnectivityProvider())
+      ],
+      child: MyApp(initialTheme: initialMode) 
     )
-    
   );
 }
 
