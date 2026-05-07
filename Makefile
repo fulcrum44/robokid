@@ -9,7 +9,7 @@ DART_DEFINES = --dart-define=SERVER_URL=$(SERVER_URL) --dart-define=API_TOKEN=$(
 
 # ─── Blockly ───
 build-blockly:
-	cd blockly && npm run build:flutter
+	cd blockly_workplace && npm run build:flutter
 
 # ─── Flutter ───
 run: build-blockly
@@ -20,10 +20,10 @@ apk: build-blockly
 
 # ─── Servidor de compilación ───
 docker-build:
-	cd compilador_robokid && docker build -t compilador_robokid .
+	cd compilator_server && docker build -t compilador_robokid .
 
 docker-run:
-	cd compilador_robokid && docker run -p 3000:3000 compilador_robokid
+	cd compilador_server && docker run -p 3000:3000 compilador_robokid
 
 # ─── Ngrok ───
 ngrok:
@@ -31,6 +31,6 @@ ngrok:
 
 # ─── Instalar dependencias ───
 install:
-	cd blockly && npm install
+	cd blockly_workplace && npm install
 	cd app && flutter pub get
-	cd compilador_robokid && npm install
+	cd compilator_server && npm install
