@@ -131,10 +131,10 @@ class FirebaseServices {
       return userCredential;
 
     } on FirebaseAuthException catch (e) {
-      rethrow;
+      rethrow ;
     } on GoogleSignInException catch (e) {
       rethrow;
-    } catch (e, stack) {
+    } catch (e) {
       rethrow;
     }
   }

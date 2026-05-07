@@ -135,6 +135,7 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Se ejecuta cuando ya tenemos el workspaceJson actualizado
   Future<void> _completeSave() async {
+    final theme = Theme.of(context);
     final auth = context.read<AuthProvider>();
     final user = auth.user;
 
@@ -156,26 +157,37 @@ class _BlockScreenState extends State<BlockScreen> {
       // si ya existe, preguntamos si sobreescribir o crear uno nuevo
       final option = await showDialog<String>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Guardar proyecto'),
-          content: Text(
-            '¿Quieres sobreescribir "$_projectName" o guardarlo como un nuevo proyecto?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+        builder: (context) {
+          final theme = Theme.of(context);
+          return AlertDialog(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            title: Text('Guardar proyecto', style: theme.textTheme.titleMedium),
+            content: Text(
+              '¿Quieres sobreescribir "$_projectName" o guardarlo como un nuevo proyecto?',
+              style: theme.textTheme.titleMedium,
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'nuevo'),
-              child: const Text('Nuevo proyecto'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, 'sobreescribir'),
-              child: const Text('Sobreescribir'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancelar', style: theme.textTheme.titleMedium),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'nuevo'),
+                child: Text(
+                  'Nuevo proyecto',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, 'sobreescribir'),
+                child: Text(
+                  'Sobreescribir',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+            ],
+          );
+        },
       );
 
       if (option == null) return;
@@ -201,8 +213,11 @@ class _BlockScreenState extends State<BlockScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Proyecto guardado'),
+        SnackBar(
+          content: Text(
+            'Proyecto guardado',
+            style: theme.textTheme.titleMedium,
+          ),
           duration: Duration(seconds: 1),
           behavior: SnackBarBehavior.floating,
         ),
@@ -213,20 +228,16 @@ class _BlockScreenState extends State<BlockScreen> {
   // Dialogo para que el usuario ponga nombre al proyecto
   Future<String?> _getProjectName() async {
     final controller = TextEditingController();
-    final theme = Theme.of(context);
 
     return showDialog<String>(
       context: context,
       builder: (context) {
+        final theme = Theme.of(context);
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,
           title: Text(
             'Nombre del proyecto',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
-            ),
+            style: theme.textTheme.titleLarge
           ),
           content: TextField(
             controller: controller,
@@ -237,11 +248,11 @@ class _BlockScreenState extends State<BlockScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: Text('Cancelar', style: theme.textTheme.titleMedium),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: const Text('Guardar'),
+              child: Text('Guardar', style: theme.textTheme.titleMedium),
             ),
           ],
         );
@@ -254,13 +265,14 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Manda el código al servidor para compilarlo
   Future<void> _compilarYSubir() async {
+    final theme = Theme.of(context);
     if (_code == null || _code!.isEmpty) return;
 
     // mostramos que estamos compilando
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Compilando...'),
+        SnackBar(
+          content: Text('Compilando...', style: theme.textTheme.titleMedium),
           duration: Duration(seconds: 30),
           behavior: SnackBarBehavior.floating,
         ),
@@ -279,8 +291,11 @@ class _BlockScreenState extends State<BlockScreen> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compilación exitosa'),
+          SnackBar(
+            content: Text(
+              'Compilación exitosa',
+              style: theme.textTheme.titleMedium,
+            ),
             duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
@@ -296,7 +311,10 @@ class _BlockScreenState extends State<BlockScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No se pudo conectar al servidor: $e'),
+          content: Text(
+            'No se pudo conectar al servidor: $e',
+            style: theme.textTheme.titleMedium,
+          ),
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
         ),
@@ -308,21 +326,25 @@ class _BlockScreenState extends State<BlockScreen> {
   void _showCompilingErrorMessage(String error) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error de compilación'),
-        content: SingleChildScrollView(
-          child: SelectableText(
-            error,
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          title: Text(
+            'Error de compilación',
+            style: theme.textTheme.titleMedium,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+          content: SingleChildScrollView(
+            child: SelectableText(error, style: theme.textTheme.titleMedium),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cerrar', style: theme.textTheme.titleMedium),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -338,6 +360,7 @@ class _BlockScreenState extends State<BlockScreen> {
       isScrollControlled: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       builder: (context) {
+        final theme = Theme.of(context);
         return Container(
           height: MediaQuery.of(context).size.height * 0.5,
           padding: const EdgeInsets.all(16),
@@ -348,10 +371,7 @@ class _BlockScreenState extends State<BlockScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Código Arduino',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('Código Arduino', style: theme.textTheme.titleMedium),
                   Row(
                     children: [
                       IconButton(
@@ -361,8 +381,8 @@ class _BlockScreenState extends State<BlockScreen> {
                           if (_code != null) {
                             Clipboard.setData(ClipboardData(text: _code!));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Código copiado'),
+                               SnackBar(
+                                content: Text('Código copiado', style: theme.textTheme.titleMedium,),
                                 duration: Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -382,7 +402,7 @@ class _BlockScreenState extends State<BlockScreen> {
                         ),
 
                       IconButton(
-                        icon: const Icon(Icons.upload),
+                        icon: const Icon(Icons.play_circle_outline_sharp),
                         tooltip: 'Compilar y subir',
                         onPressed: () {
                           Navigator.pop(context);
@@ -402,10 +422,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 child: SingleChildScrollView(
                   child: SelectableText(
                     _code ?? '',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontFamily: 'monospace',
-                      fontSize: 13,
-                    ),
+                    style: theme.textTheme.titleSmall,
                   ),
                 ),
               ),
@@ -433,31 +450,32 @@ class _BlockScreenState extends State<BlockScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // boton para limpiar el workspace
-                FloatingActionButton(
-                  heroTag: 'limpiar',
+                ElevatedButton(
+                  key: Key('limpiar'),
                   onPressed: _loaded ? _cleanWorkspace : null,
-                  backgroundColor: _loaded ? null : Colors.grey,
                   child: const Icon(Icons.delete_outline),
                 ),
                 const SizedBox(width: 12),
 
                 // boton para guardar el proyecto
                 if (!isGuest)
-                  FloatingActionButton(
-                    heroTag: 'guardar',
+                  ElevatedButton(
+                    key: Key('guardar'),
                     onPressed: _loaded ? _save : null,
-                    backgroundColor: _loaded ? null : Colors.grey,
                     child: const Icon(Icons.save),
                   ),
 
                 if (!isGuest) const SizedBox(width: 12),
 
                 // boton para compilar (generar codigo arduino)
-                FloatingActionButton(
-                  heroTag: 'compilar',
+                ElevatedButton(
+                  style: ButtonStyle().copyWith(
+
+                  ),
+                  key: Key('compilar'),
                   onPressed: _loaded ? _compile : null,
-                  backgroundColor: _loaded ? null : Colors.grey,
                   child: const Icon(Icons.play_arrow),
+               
                 ),
               ],
             ),
