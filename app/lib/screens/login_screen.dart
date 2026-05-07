@@ -19,10 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool buttonIsLoading = false;
   // Booleano para el icono para ver la contraseña
   bool obscureText = true;
-  // BORRAR ?
-  bool showButtons = false;
-
-  final FirebaseServices firebaseServices = FirebaseServices();
 
   @override
   void initState() {

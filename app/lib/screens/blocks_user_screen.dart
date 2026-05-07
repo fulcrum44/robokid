@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:robokid/screens/send_screen.dart';
+import 'package:robokid/screens/screens.dart';
+import 'package:robokid/config/config.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
@@ -264,9 +265,6 @@ class _BlockScreenState extends State<BlockScreen> {
     );
   }
 
-  // url del servidor de compilacion (cambiar segun donde este desplegado)
-  static const _urlServer = 'https://democrat-hence-safehouse.ngrok-free.dev';
-
   // Manda el código al servidor para compilarlo
   Future<void> _compilarYSubir() async {
     final theme = Theme.of(context);
@@ -285,9 +283,15 @@ class _BlockScreenState extends State<BlockScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('$_urlServer/compile'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'codigo': _code, 'placa': 'esp8266:esp8266:d1'}),
+        Uri.parse('${AppConfig.serverUrl}/compile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${AppConfig.compilerApiToken}',
+        },
+        body: jsonEncode({
+          'codigo': _code,
+          'placa': 'esp8266:esp8266:d1',
+        }),
       );
 
       if (!mounted) return;
