@@ -88,77 +88,6 @@ function inyectarAdelante() {
     '  while (pasos > 0) {\n' +
     '    if (stepMotor == 1 && micros() - lastTime > velocidad) {\n' +
     '      digitalWrite(motorPin11, HIGH); digitalWrite(motorPin12, LOW);\n' +
-    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, LOW);\n' +
-    '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, LOW);\n' +
-    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, HIGH);\n' +
-    '      stepMotor = 2; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
-    '    }\n' +
-    '    if (stepMotor == 2 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, HIGH); digitalWrite(motorPin12, HIGH);\n' +
-    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, LOW);\n' +
-    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, LOW);\n' +
-    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, HIGH);\n' +
-    '      stepMotor = 3; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
-    '    }\n' +
-    '    if (stepMotor == 3 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, HIGH);\n' +
-    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, LOW);\n' +
-    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, HIGH);\n' +
-    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
-    '      stepMotor = 4; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
-    '    }\n' +
-    '    if (stepMotor == 4 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, HIGH);\n' +
-    '      digitalWrite(motorPin13, HIGH); digitalWrite(motorPin14, LOW);\n' +
-    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, LOW);\n' +
-    '      digitalWrite(motorPin23, HIGH); digitalWrite(motorPin24, LOW);\n' +
-    '      stepMotor = 5; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
-    '    }\n' +
-    '    if (stepMotor == 5 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, LOW);\n' +
-    '      digitalWrite(motorPin13, HIGH); digitalWrite(motorPin14, LOW);\n' +
-    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, HIGH);\n' +
-    '      digitalWrite(motorPin23, HIGH); digitalWrite(motorPin24, LOW);\n' +
-    '      stepMotor = 6; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
-    '    }\n' +
-    '    if (stepMotor == 6 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, LOW);\n' +
-    '      digitalWrite(motorPin13, HIGH); digitalWrite(motorPin14, HIGH);\n' +
-    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, HIGH);\n' +
-    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
-    '      stepMotor = 7; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
-    '    }\n' +
-    '    if (stepMotor == 7 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, LOW);\n' +
-    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, HIGH);\n' +
-    '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, HIGH);\n' +
-    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
-    '      stepMotor = 8; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
-    '    }\n' +
-    '    if (stepMotor == 8 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, HIGH); digitalWrite(motorPin12, LOW);\n' +
-    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, HIGH);\n' +
-    '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, LOW);\n' +
-    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
-    '      stepMotor = 1; delayMicroseconds(900); lastTime = micros(); pasos--; delay(1);\n' +
-    '    }\n' +
-    '  }\n' +
-    '  cm = distancia(1, 3);\n' +
-    '  cm = distancia(1, 3);\n' +
-    '}';
-}
-
-function inyectarAtras() {
-  inyectarBase();
-  inyectarDistancia();
-  arduinoGenerator.definitions_['func_atras'] =
-    'void atras(int vuelta) {\n' +
-    '  pasos = 4096 * vuelta;\n' +
-    codigoInicioMovimiento() +
-    '  direccion = 2;\n' +
-    '  while (pasos > 0) {\n' +
-    '    if (stepMotor == 1 && micros() - lastTime > velocidad) {\n' +
-    '      digitalWrite(motorPin11, HIGH); digitalWrite(motorPin12, LOW);\n' +
     '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, HIGH);\n' +
     '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, LOW);\n' +
     '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
@@ -211,6 +140,77 @@ function inyectarAtras() {
     '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, LOW);\n' +
     '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, LOW);\n' +
     '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, HIGH);\n' +
+    '      stepMotor = 1; delayMicroseconds(900); lastTime = micros(); pasos--; delay(1);\n' +
+    '    }\n' +
+    '  }\n' +
+    '  cm = distancia(1, 3);\n' +
+    '  cm = distancia(1, 3);\n' +
+    '}';
+}
+
+function inyectarAtras() {
+  inyectarBase();
+  inyectarDistancia();
+  arduinoGenerator.definitions_['func_atras'] =
+    'void atras(int vuelta) {\n' +
+    '  pasos = 4096 * vuelta;\n' +
+    codigoInicioMovimiento() +
+    '  direccion = 2;\n' +
+    '  while (pasos > 0) {\n' +
+    '    if (stepMotor == 1 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, HIGH); digitalWrite(motorPin12, LOW);\n' +
+    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, LOW);\n' +
+    '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, LOW);\n' +
+    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, HIGH);\n' +
+    '      stepMotor = 2; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
+    '    }\n' +
+    '    if (stepMotor == 2 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, HIGH); digitalWrite(motorPin12, HIGH);\n' +
+    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, LOW);\n' +
+    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, LOW);\n' +
+    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, HIGH);\n' +
+    '      stepMotor = 3; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
+    '    }\n' +
+    '    if (stepMotor == 3 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, HIGH);\n' +
+    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, LOW);\n' +
+    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, HIGH);\n' +
+    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
+    '      stepMotor = 4; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
+    '    }\n' +
+    '    if (stepMotor == 4 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, HIGH);\n' +
+    '      digitalWrite(motorPin13, HIGH); digitalWrite(motorPin14, LOW);\n' +
+    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, LOW);\n' +
+    '      digitalWrite(motorPin23, HIGH); digitalWrite(motorPin24, LOW);\n' +
+    '      stepMotor = 5; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
+    '    }\n' +
+    '    if (stepMotor == 5 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, LOW);\n' +
+    '      digitalWrite(motorPin13, HIGH); digitalWrite(motorPin14, LOW);\n' +
+    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, HIGH);\n' +
+    '      digitalWrite(motorPin23, HIGH); digitalWrite(motorPin24, LOW);\n' +
+    '      stepMotor = 6; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
+    '    }\n' +
+    '    if (stepMotor == 6 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, LOW);\n' +
+    '      digitalWrite(motorPin13, HIGH); digitalWrite(motorPin14, HIGH);\n' +
+    '      digitalWrite(motorPin21, LOW);  digitalWrite(motorPin22, HIGH);\n' +
+    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
+    '      stepMotor = 7; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
+    '    }\n' +
+    '    if (stepMotor == 7 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, LOW);  digitalWrite(motorPin12, LOW);\n' +
+    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, HIGH);\n' +
+    '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, HIGH);\n' +
+    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
+    '      stepMotor = 8; delayMicroseconds(900); lastTime = micros(); pasos--;\n' +
+    '    }\n' +
+    '    if (stepMotor == 8 && micros() - lastTime > velocidad) {\n' +
+    '      digitalWrite(motorPin11, HIGH); digitalWrite(motorPin12, LOW);\n' +
+    '      digitalWrite(motorPin13, LOW);  digitalWrite(motorPin14, HIGH);\n' +
+    '      digitalWrite(motorPin21, HIGH); digitalWrite(motorPin22, LOW);\n' +
+    '      digitalWrite(motorPin23, LOW);  digitalWrite(motorPin24, LOW);\n' +
     '      stepMotor = 1; delayMicroseconds(900); lastTime = micros(); pasos--; delay(1);\n' +
     '    }\n' +
     '  }\n' +
