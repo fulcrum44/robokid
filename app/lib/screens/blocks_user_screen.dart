@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:robokid/config/config.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
@@ -249,9 +250,6 @@ class _BlockScreenState extends State<BlockScreen> {
     );
   }
 
-  // url del servidor de compilacion (cambiar segun donde este desplegado)
-  static const _urlServer = 'https://democrat-hence-safehouse.ngrok-free.dev';
-
   // Manda el código al servidor para compilarlo
   Future<void> _compilarYSubir() async {
     if (_code == null || _code!.isEmpty) return;
@@ -269,10 +267,10 @@ class _BlockScreenState extends State<BlockScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('$_urlServer/compile'),
+        Uri.parse('${AppConfig.serverUrl}/compile'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer robokid-token-2026',
+          'Authorization': 'Bearer ${AppConfig.compilerApiToken}',
         },
         body: jsonEncode({
           'codigo': _code,
