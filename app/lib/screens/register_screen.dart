@@ -32,6 +32,10 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    nameController.dispose();
+    lastNameController.dispose();
     super.dispose();
   }
 
@@ -164,10 +168,10 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
 
                         final String email = emailController.text.trim();
                         final String lastName = lastNameController
-                            .text // está sin usar, pendiente de un user_sevice con un insertUsuario()
+                            .text
                             .trim();
                         final String name = nameController.text
-                            .trim(); // está sin usar, pendiente de un user_sevice con un insertUsuario()
+                            .trim();
 
                         setState(() => buttonIsLoading = true);
 
