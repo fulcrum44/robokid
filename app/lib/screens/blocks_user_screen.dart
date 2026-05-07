@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:robokid/screens/send_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
+import 'dart:typed_data';
 
 import '../providers/auth_provider.dart';
 
@@ -27,6 +29,8 @@ class _BlockScreenState extends State<BlockScreen> {
   String? _projectId; // id del proyecto actual (null si es nuevo)
   String? _projectName; // nombre del proyecto actual
   bool _saving = false;
+
+  Uint8List? _firmwareBytes; // .bin recibido tras compilar
 
   @override
   void initState() {
@@ -128,9 +132,9 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Empieza el proceso de guardado: primero pide el workspace a Blockly
   void _save() {
+    if (_saving) return;
     _saving = true;
     _getWorkspaceState();
-    // cuando llegue el workspaceState en _onMensaje, se llama a _completarGuardado
   }
 
   // Se ejecuta cuando ya tenemos el workspaceJson actualizado
@@ -140,7 +144,7 @@ class _BlockScreenState extends State<BlockScreen> {
     final user = auth.user;
 
     final uid = user?.uid;
-
+    
     if (uid == null || _workspaceJson == null) return;
 
     // si es un proyecto nuevo, pedimos el nombre
@@ -283,17 +287,21 @@ class _BlockScreenState extends State<BlockScreen> {
       final response = await http.post(
         Uri.parse('$_urlServer/compile'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'codigo': _code, 'placa': 'esp8266:esp8266:d1'}),
+        body: jsonEncode({
+          'codigo': _code,
+          'placa': 'esp8266:esp8266:d1',
+        }),
       );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       if (response.statusCode == 200) {
+        setState(() => _firmwareBytes = response.bodyBytes);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Compilación exitosa',
+              'Compilación exitosa — pulsa ENVIAR para flashear',
               style: theme.textTheme.titleMedium,
             ),
             duration: Duration(seconds: 2),
@@ -351,7 +359,7 @@ class _BlockScreenState extends State<BlockScreen> {
   // Muestra el código generado en un panel inferior
   void _showCode() {
     final theme = Theme.of(context);
-    final auth = context.read<AuthProvider>();
+    final auth = context.read<AuthProvider>(); 
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
@@ -390,7 +398,7 @@ class _BlockScreenState extends State<BlockScreen> {
                           }
                         },
                       ),
-
+                      
                       if (!isGuest)
                         IconButton(
                           icon: const Icon(Icons.save),
@@ -435,7 +443,7 @@ class _BlockScreenState extends State<BlockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = context.watch<AuthProvider>(); 
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
@@ -465,6 +473,7 @@ class _BlockScreenState extends State<BlockScreen> {
                     child: const Icon(Icons.save),
                   ),
 
+
                 if (!isGuest) const SizedBox(width: 12),
 
                 // boton para compilar (generar codigo arduino)
@@ -475,7 +484,24 @@ class _BlockScreenState extends State<BlockScreen> {
                   key: Key('compilar'),
                   onPressed: _loaded ? _compile : null,
                   child: const Icon(Icons.play_arrow),
-               
+                ),
+
+                FloatingActionButton.extended(
+                  heroTag: 'enviar',
+                  onPressed:
+                      _firmwareBytes !=
+                          null // solo activo si hay .bin
+                      ? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SendScreen(
+                              firmwareBytes: _firmwareBytes!,
+                              firmwareName: 'firmware.bin',
+                            ),
+                          ),
+                        )
+                      : null,
+                  label: const Text('ENVIAR'),
                 ),
               ],
             ),

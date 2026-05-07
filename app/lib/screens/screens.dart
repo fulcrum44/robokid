@@ -5,3 +5,4 @@ export 'package:robokid/screens/record_screen.dart';
 export 'package:robokid/screens/navigation_screen.dart';
 export 'package:robokid/screens/config_screen.dart';
 export 'package:robokid/screens/wrapper.dart';
+export 'package:robokid/screens/send_screen.dart';
