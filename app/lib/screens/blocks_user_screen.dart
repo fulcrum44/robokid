@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:robokid/screens/screens.dart';
 import 'package:robokid/config/config.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
+import 'dart:typed_data';
 
-import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 
 class BlockScreen extends StatefulWidget {
   final String? projectId; // si viene un id, cargamos ese proyecto al abrir
@@ -28,6 +30,8 @@ class _BlockScreenState extends State<BlockScreen> {
   String? _projectId; // id del proyecto actual (null si es nuevo)
   String? _projectName; // nombre del proyecto actual
   bool _saving = false;
+
+  Uint8List? _firmwareBytes; // .bin recibido tras compilar
 
   @override
   void initState() {
@@ -129,9 +133,9 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Empieza el proceso de guardado: primero pide el workspace a Blockly
   void _save() {
+    if (_saving) return;
     _saving = true;
     _getWorkspaceState();
-    // cuando llegue el workspaceState en _onMensaje, se llama a _completarGuardado
   }
 
   // Se ejecuta cuando ya tenemos el workspaceJson actualizado
@@ -266,6 +270,17 @@ class _BlockScreenState extends State<BlockScreen> {
     final theme = Theme.of(context);
     if (_code == null || _code!.isEmpty) return;
 
+    final conn = context.read<ConnectivityProvider>();
+    
+    if (!conn.hasInternet) {
+      CustomSnackBar.showSnackBar(
+        'Es necesario estar conectado a internet para compilar',
+        context,
+        theme
+      );
+      return;
+    }
+
     // mostramos que estamos compilando
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -294,10 +309,11 @@ class _BlockScreenState extends State<BlockScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       if (response.statusCode == 200) {
+        setState(() => _firmwareBytes = response.bodyBytes);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Compilación exitosa',
+              'Compilación exitosa — Desactiva los datos móviles y pulsa ENVIAR para flashear',
               style: theme.textTheme.titleMedium,
             ),
             duration: Duration(seconds: 2),
@@ -443,10 +459,13 @@ class _BlockScreenState extends State<BlockScreen> {
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
+    final conn = context.watch<ConnectivityProvider>();
+
     return Scaffold(
       appBar: CustomAppBar(),
       body: Column(
         children: [
+          const ConnectivityBanner(),
           Expanded(child: WebViewWidget(controller: _controller)),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -465,7 +484,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 if (!isGuest)
                   ElevatedButton(
                     key: Key('guardar'),
-                    onPressed: _loaded ? _save : null,
+                    onPressed: _loaded && conn.hasInternet ? _save : null,
                     child: const Icon(Icons.save),
                   ),
 
@@ -479,7 +498,23 @@ class _BlockScreenState extends State<BlockScreen> {
                   key: Key('compilar'),
                   onPressed: _loaded ? _compile : null,
                   child: const Icon(Icons.play_arrow),
-               
+                ),
+
+                FloatingActionButton.extended(
+                  heroTag: 'enviar',
+                  onPressed:
+                      _firmwareBytes != null && conn.isOnRobotWifi // solo activo si hay .bin y estamos conectados al robot
+                      ? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SendScreen(
+                              firmwareBytes: _firmwareBytes!,
+                              firmwareName: 'firmware.bin',
+                            ),
+                          ),
+                        )
+                      : null,
+                  label: const Text('ENVIAR'),
                 ),
               ],
             ),

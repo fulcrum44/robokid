@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly';
+import OTA_TEMPLATE from '../../../firmware/ota_bootloader.ino?raw';
 
 export const arduinoGenerator = new Blockly.Generator('Arduino');
 
@@ -18,17 +19,28 @@ arduinoGenerator.init = function(workspace) {
   Object.getPrototypeOf(arduinoGenerator).init.call(this, workspace);
 };
 
+arduinoGenerator.scrub_ = function(block, code, thisOnly) {
+  const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
+  if (nextBlock && !thisOnly) {
+    return code + this.blockToCode(nextBlock);
+  }
+  return code;
+};
+
 // ensamblado de los bloques en un sketch unificado
 arduinoGenerator.finish = function(code) {
   const includes = Object.values(this.definitions_).join('\n');
   const setups   = Object.values(this.setups_).join('\n  ');
-  return `${includes}
+  return `${OTA_TEMPLATE}
+  ${includes}
 
 void setup() {
+  configurarOTA();
   ${setups}
 }
 
 void loop() {
+  otaServer.handleClient();
   ${code}
 }
 `;

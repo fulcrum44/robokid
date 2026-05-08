@@ -27,7 +27,7 @@ docker-run:
 
 # ─── Ngrok ───
 ngrok:
-	ngrok http 3000 --url=democrat-hence-safehouse.ngrok-free.app
+	ngrok http 3000 --url=democrat-hence-safehouse.ngrok-free.dev
 
 # ─── Instalar dependencias ───
 install:
