@@ -51,6 +51,10 @@ class AppTheme {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(foregroundColor: Colors.lightBlue),
     ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: robokids,
+      selectionHandleColor: robokids,
+    ),
     // Estilo de los textos
     textTheme: TextTheme(
       titleLarge: TextStyle(
@@ -78,7 +82,7 @@ class AppTheme {
     progressIndicatorTheme: ProgressIndicatorThemeData(color: robokids),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
-    )
+    ),
   );
 
   // TEMA OSCURO
@@ -108,7 +112,11 @@ class AppTheme {
     ),
     // Estilo de los TextButtons
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(foregroundColor: Colors.blue),
+      style: TextButton.styleFrom(foregroundColor: robokids),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.white,
+      selectionHandleColor: Colors.white,
     ),
     // Estilo de los textos
     textTheme: TextTheme(
