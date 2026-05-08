@@ -964,9 +964,9 @@ void loop() {
 `};var Wn={type:`mover_motores`,message0:`Mover robot hacia %1`,args0:[{type:`field_dropdown`,name:`DIRECCION`,options:[[`Adelante`,`FORWARD`],[`Atrás`,`BACKWARD`],[`Izquierda`,`LEFT`],[`Derecha`,`RIGHT`],[`Detener`,`STOP`]]}],previousStatement:null,nextStatement:null,colour:230,tooltip:`Elige hacia dónde quieres que ruede el robot`},Gn={type:`cambiar_velocidad`,message0:`Poner velocidad del robot al %1 %`,args0:[{type:`field_number`,name:`VELOCIDAD`,value:50,min:0,max:100}],previousStatement:null,nextStatement:null,colour:20,tooltip:`Ajusta lo rápido que se mueve el robot (de 0 a 100)`},Kn={type:`leer_distancia`,message0:`Distancia del obstáculo (cm)`,output:`Number`,colour:760,tooltip:`Mide a cuántos centímetros está el objeto más cercano, como un murciélago`},qn={type:`detectar_obstaculo`,message0:`¿Hay algo a menos de %1 cm?`,args0:[{type:`field_number`,name:`DISTANCIA`,value:10,min:0}],output:`Boolean`,colour:150,tooltip:`Te avisa si el robot está a punto de chocar con algo`},Jn={type:`mover_motor_grados`,message0:`Girar motor a %1 grados`,args0:[{type:`field_number`,name:`ANGULO`,value:90,min:0,max:180}],previousStatement:null,nextStatement:null,colour:260,tooltip:`Mueve el motor a una posición exacta para apuntar o agarrar cosas`},Yn={type:`esperar_segundos`,message0:`Esperar %1 segundos`,args0:[{type:`field_number`,name:`SEGUNDOS`,value:1,min:0}],previousStatement:null,nextStatement:null,colour:355,tooltip:`Hace que el robot se quede haciendo lo mismo o pausado durante este tiempo`};S.forBlock.math_number=function(e){let t=Number(e.getFieldValue(`NUM`));return[String(t),S.ORDER_ATOMIC]},S.forBlock.math_arithmetic=function(e,t){let n={ADD:[` + `,t.ORDER_ATOMIC],MINUS:[` - `,t.ORDER_ATOMIC],MULTIPLY:[` * `,t.ORDER_ATOMIC],DIVIDE:[` / `,t.ORDER_ATOMIC],POWER:[null,t.ORDER_ATOMIC]}[e.getFieldValue(`OP`)],r=t.valueToCode(e,`A`,n[1])||`0`,i=t.valueToCode(e,`B`,n[1])||`0`;return e.getFieldValue(`OP`)===`POWER`?[`pow(`+r+`, `+i+`)`,t.ORDER_ATOMIC]:[r+n[0]+i,n[1]]},S.forBlock.controls_if=function(e,t){let n=``,r=0;for(;e.getInput(`IF`+r);){let i=t.valueToCode(e,`IF`+r,t.ORDER_NONE)||`false`,a=t.statementToCode(e,`DO`+r);n+=(r>0?` else `:``)+`if (`+i+`) {
 `+a+`}`,r++}if(e.getInput(`ELSE`)){let r=t.statementToCode(e,`ELSE`);n+=` else {
 `+r+`}`}return n+`
-`},C.forBlock.controls_ifelse=C.forBlock.controls_if,C.forBlock.controls_repeat_ext=function(e,t){let n=t.valueToCode(e,`TIMES`,t.ORDER_NONE)||`0`,r=t.statementToCode(e,`DO`);return`for (int i = 0; i < `+n+`; i++) {
+`},S.forBlock.controls_ifelse=S.forBlock.controls_if,S.forBlock.controls_repeat_ext=function(e,t){let n=t.valueToCode(e,`TIMES`,t.ORDER_NONE)||`0`,r=t.statementToCode(e,`DO`);return`for (int i = 0; i < `+n+`; i++) {
 `+r+`}
-`},C.forBlock.controls_whileUntil=function(e,t){let n=e.getFieldValue(`MODE`),r=t.valueToCode(e,`BOOL`,t.ORDER_NONE)||`false`,i=t.statementToCode(e,`DO`);return n===`UNTIL`?`while (!(`+r+`)) {
+`},S.forBlock.controls_whileUntil=function(e,t){let n=e.getFieldValue(`MODE`),r=t.valueToCode(e,`BOOL`,t.ORDER_NONE)||`false`,i=t.statementToCode(e,`DO`);return n===`UNTIL`?`while (!(`+r+`)) {
 `+i+`}
 `:`while (`+r+`) {
 `+i+`}
@@ -977,12 +977,12 @@ void loop() {
 #define motorPin21 12
 #define motorPin22 14
 #define motorPin23 4
-#define motorPin24 5`,C.definitions_.motor_vars=`int pasos = 0;
+#define motorPin24 5`,S.definitions_.motor_vars=`int pasos = 0;
 int stepMotor = 1;
 unsigned long velocidad = 50;
 unsigned long lastTime = 0;
 int direccion = 0;
-int cm = 0;`,C.setups_.motor_pins_init=`  pinMode(motorPin11, OUTPUT);
+int cm = 0;`,S.setups_.motor_pins_init=`  pinMode(motorPin11, OUTPUT);
   pinMode(motorPin12, OUTPUT);
   pinMode(motorPin13, OUTPUT);
   pinMode(motorPin14, OUTPUT);
