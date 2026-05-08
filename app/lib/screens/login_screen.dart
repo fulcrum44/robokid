@@ -59,10 +59,15 @@ class _LoginScreenState extends State<LoginScreen> {
         // Para que el teclado no empuje los SnackBars
         resizeToAvoidBottomInset: false,
         body: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            vertical: MediaQuery.of(context).size.height * 0.0225,
+            horizontal: MediaQuery.of(context).size.height * 0.0225,
+          ),
           child: SizedBox(
             width: double.infinity,
             child: Column(
               children: [
+                const ConnectivityBanner(),
                 // Contenedor primario
                 Container(
                   alignment: Alignment.center,

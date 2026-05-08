@@ -39,22 +39,56 @@ class ConnectivityProvider extends ChangeNotifier {
   Future<void> _checkConnection() async {
     final result = await _connectivity.checkConnectivity();
 
+    // Ninguna conexión activa
     if (result.contains(ConnectivityResult.none) || result.isEmpty) {
       _updateState(AppConnectionState.offline);
+      _setInitialized();
       return;
-    } else if (await _isRobotReachable()) { // Comprobamos si estamos en la red que hemos configurado para el robot (192.168.4.1)
-      _updateState(AppConnectionState.robotWifi);
-      return;
-    } else if (await _hasRealInternet()) { // Comprobamos si hay internet real
-      _updateState(AppConnectionState.online);
-      return;
-    } else {
-      _updateState(AppConnectionState.offline);
     }
 
+    // Si hay WiFi, comprobar si es el robot primero
+    if (result.contains(ConnectivityResult.wifi)) {
+      if (await _isRobotReachable()) {
+        _updateState(AppConnectionState.robotWifi);
+        _setInitialized();
+        return;
+      }
+    }
+
+    // Si hay WiFi o datos móviles declaramos que estamos online
+    if (result.contains(ConnectivityResult.wifi) ||
+        result.contains(ConnectivityResult.mobile)) {
+      _updateState(AppConnectionState.online);
+      _setInitialized();
+      // Verificar en segundo plano
+      _verifyInternetInBackground();
+      return;
+    }
+
+    _updateState(AppConnectionState.offline);
+    _setInitialized();
+  }
+
+  void _setInitialized() {
     if (!_initialized) {
       _initialized = true;
       notifyListeners();
+    }
+  }
+
+  Future<void> _verifyInternetInBackground() async {
+    if (!await _hasRealInternet()) {
+      _updateState(AppConnectionState.offline);
+    }
+  }
+
+  Future<bool> _hasRealInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com')
+          .timeout(const Duration(seconds: 2));
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -66,16 +100,6 @@ class ConnectivityProvider extends ChangeNotifier {
           .then((req) => req.close())
           .timeout(const Duration(seconds: 15));
       return response.statusCode == 200;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<bool> _hasRealInternet() async {
-    try {
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(const Duration(seconds: 3));
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } catch (_) {
       return false;
     }
