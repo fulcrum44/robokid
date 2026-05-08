@@ -142,7 +142,7 @@ class FirebaseServices {
   // vincular Google a cuenta existente
   Future<void> linkGoogleAccount(BuildContext context) async {
     try {
-      initGoogleSignIn();
+      await initGoogleSignIn();
       
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 

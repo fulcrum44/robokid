@@ -18,6 +18,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
   String _themeMode = 'system';
   final _recordKey = GlobalKey<RecordScreenState>();
 
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
   // cuando el usuario toca un proyecto en el historial, cambiamos a la tab de bloques
   void _openProject(String proyectoId) {
     setState(() {
@@ -29,13 +35,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
   Future<void> _loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _themeMode = prefs.getString('theme_mode') ?? 'system';
+      _themeMode = prefs.getString('theme') ?? 'system';
     });
   }
 
   Future<void> _changeThemeMode(String mode) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('theme_mode', mode);
+    await prefs.setString('theme', mode);
     setState(() {
       _themeMode = mode;
     });

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String? logo;
   final bool showTitle;
   final bool automaticallyImplyLeading;
 
   const CustomAppBar({
     super.key,
-    this.logo,
     this.showTitle = true,
     this.automaticallyImplyLeading = false,
   });
