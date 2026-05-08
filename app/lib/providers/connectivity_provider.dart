@@ -17,9 +17,13 @@ class ConnectivityProvider extends ChangeNotifier {
   AppConnectionState _state = AppConnectionState.offline;
   AppConnectionState get state => _state;
 
+  bool _mobileDataActive = false;
+  bool get movileDataACtive => _mobileDataActive;
+
   bool get hasInternet => _state == AppConnectionState.online;
-  bool get isOnRobotWifi => _state == AppConnectionState.robotWifi;
+  bool get isOnRobotWifi => _state == AppConnectionState.robotWifi && !_mobileDataActive;
   bool get isOffile => _state == AppConnectionState.offline;
+
 
   // Con este flag controloamos cuando aparece el banner que indica si no hay conexión a internet o estamos conectados al robot.
   bool _initialized = false;
@@ -38,6 +42,9 @@ class ConnectivityProvider extends ChangeNotifier {
 
   Future<void> _checkConnection() async {
     final result = await _connectivity.checkConnectivity();
+
+    // Primero comprobamos si la conexión a internet es media datos móviles
+    _mobileDataActive = result.contains(ConnectivityResult.mobile);
 
     // Ninguna conexión activa
     if (result.contains(ConnectivityResult.none) || result.isEmpty) {
