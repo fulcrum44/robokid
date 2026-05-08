@@ -57,6 +57,7 @@ class _RegisterScreenStateAlumn extends State<RegisterScreen> {
           key: formKey,
           child: Column(
             children: [
+              const ConnectivityBanner(),     
               Text(
                 'Registro',
                 textAlign: TextAlign.center,

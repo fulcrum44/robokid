@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:robokid/providers/providers.dart';
+import 'package:robokid/widgets/widgets.dart';
 
 class SendScreen extends StatefulWidget {
   final Uint8List firmwareBytes;
@@ -35,6 +36,19 @@ class _SendScreenState extends State<SendScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ConnectivityProvider>().refresh();
     });
+  }
+
+  void _checkConnection() {
+    final conn = context.read<ConnectivityProvider>();
+    if (!conn.isOnRobotWifi && !_uploading) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Conexión con el robot perdida'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.pop(context);
+    }
   }
 
   Future<void> _uploadFirmware() async {
@@ -95,6 +109,19 @@ class _SendScreenState extends State<SendScreen> {
     final theme = Theme.of(context);
 
     final conn = context.watch<ConnectivityProvider>();
+
+    if (!conn.isOnRobotWifi && !_uploading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          CustomSnackBar.showSnackBar(
+            'Se ha perdido la conexión con el robot',
+            context,
+            theme
+          );
+          Navigator.pop(context);
+        }
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(

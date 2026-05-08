@@ -121,6 +121,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const ConnectivityBanner(),  
             Text(
               'Configuración',
               textAlign: TextAlign.center,

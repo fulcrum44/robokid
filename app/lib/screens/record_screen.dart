@@ -168,6 +168,7 @@ class RecordScreenState extends State<RecordScreen> {
       body: Center(
         child: Column(
           children: [
+            const ConnectivityBanner(),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
