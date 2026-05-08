@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:robokid/providers/providers.dart';
-import 'package:robokid/widgets/custom_snackbar.dart';
+import 'package:robokid/widgets/widgets.dart';
 
 class SendScreen extends StatefulWidget {
   final Uint8List firmwareBytes;
