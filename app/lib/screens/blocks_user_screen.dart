@@ -246,7 +246,7 @@ class _BlockScreenState extends State<BlockScreen> {
             controller: controller,
             autofocus: true,
             style: theme.textTheme.titleMedium,
-            decoration: const InputDecoration(hintText: 'Ej: Mi robot'),
+            decoration: InputDecoration(hintText: 'Ej: Mi robot'),
           ),
           actions: [
             TextButton(

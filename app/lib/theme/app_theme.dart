@@ -40,6 +40,26 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
     ),
+    // Estilo de los filledButton
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: robokids,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: robokids,
+        disabledForegroundColor: Colors.white,
+      ),
+    ),
+  // Estilo de los textField
+    inputDecorationTheme: InputDecorationTheme(
+      labelStyle: TextStyle(color: robokids), 
+      enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: robokids), 
+    ),
+    
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: robokids), 
+    ),
+    ),
     // Estilo de los OutlinedButtons
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
@@ -102,6 +122,27 @@ class AppTheme {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
+    ),
+    // Estilo de lso filledButton
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: Colors.black,
+        disabledForegroundColor: Colors.white,
+      ),
+    ),
+    // Estilo de los textField
+    inputDecorationTheme: InputDecorationTheme(
+      labelStyle: TextStyle(color: Colors.white), 
+
+      enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.white), 
+    ),
+    
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.white), 
+    ),
     ),
     // Estilo de los OutlinedButtons
     outlinedButtonTheme: OutlinedButtonThemeData(
