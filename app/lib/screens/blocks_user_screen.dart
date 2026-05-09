@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:robokid/screens/send_screen.dart';
+import 'package:robokid/screens/screens.dart';
+import 'package:robokid/config/config.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
 import 'dart:typed_data';
 
-import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 
 class BlockScreen extends StatefulWidget {
   final String? projectId; // si viene un id, cargamos ese proyecto al abrir
@@ -263,13 +264,21 @@ class _BlockScreenState extends State<BlockScreen> {
     );
   }
 
-  // url del servidor de compilacion (cambiar segun donde este desplegado)
-  static const _urlServer = 'https://democrat-hence-safehouse.ngrok-free.dev';
-
   // Manda el código al servidor para compilarlo
   Future<void> _compilarYSubir() async {
     final theme = Theme.of(context);
     if (_code == null || _code!.isEmpty) return;
+
+    final conn = context.read<ConnectivityProvider>();
+    
+    if (!conn.hasInternet) {
+      CustomSnackBar.showSnackBar(
+        'Es necesario estar conectado a internet para compilar',
+        context,
+        theme
+      );
+      return;
+    }
 
     // mostramos que estamos compilando
     if (mounted) {
@@ -284,9 +293,15 @@ class _BlockScreenState extends State<BlockScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('$_urlServer/compile'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'codigo': _code, 'placa': 'esp8266:esp8266:d1'}),
+        Uri.parse('${AppConfig.serverUrl}/compile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${AppConfig.compilerApiToken}',
+        },
+        body: jsonEncode({
+          'codigo': _code,
+          'placa': 'esp8266:esp8266:d1',
+        }),
       );
 
       if (!mounted) return;
@@ -297,7 +312,7 @@ class _BlockScreenState extends State<BlockScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Compilación exitosa — pulsa ENVIAR para flashear',
+              'Compilación exitosa — Desactiva los datos móviles y pulsa ENVIAR para flashear',
               style: theme.textTheme.titleMedium,
             ),
             duration: Duration(seconds: 2),
@@ -447,10 +462,13 @@ class _BlockScreenState extends State<BlockScreen> {
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
 
+    final conn = context.watch<ConnectivityProvider>();
+
     return Scaffold(
       appBar: CustomAppBar(),
       body: Column(
         children: [
+          const ConnectivityBanner(),
           Expanded(child: WebViewWidget(controller: _controller)),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -469,7 +487,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 if (!isGuest)
                   ElevatedButton(
                     key: Key('guardar'),
-                    onPressed: _loaded ? _save : null,
+                    onPressed: _loaded && conn.hasInternet ? _save : null,
                     child: const Icon(Icons.save),
                   ),
 
@@ -487,8 +505,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 ElevatedButton(
                   key: Key('enviar'),
                   onPressed:
-                      _firmwareBytes !=
-                          null // solo activo si hay .bin
+                      _firmwareBytes != null && conn.isOnRobotWifi // solo activo si hay .bin y estamos conectados al robot
                       ? () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -500,7 +517,7 @@ class _BlockScreenState extends State<BlockScreen> {
                         )
                       : null,
                   child: Text(
-                    'Enviar Placa',
+                    'Grabar en Placa',
                     style: theme.textTheme.titleSmall,
                   ),
                 ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:robokid/providers/auth_provider.dart';
+import 'package:robokid/providers/providers.dart';
 import 'package:robokid/screens/screens.dart';
 
 class Wrapper extends StatelessWidget {

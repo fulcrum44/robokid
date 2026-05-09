@@ -43,7 +43,7 @@ class LoginFormWidget extends StatelessWidget {
     return TextFormField(
       style: TextStyle(color: theme.textTheme.titleSmall?.color),
       autofocus: false,
-      textCapitalization: TextCapitalization.words,
+      textCapitalization: (hintText!.contains('Correo') || hintText!.contains("Contraseña"))? TextCapitalization.none : TextCapitalization.words,
       keyboardType: keyboardType,
       obscureText: obscureText,
       maxLength: maxLength,

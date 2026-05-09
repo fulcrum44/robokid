@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class GoogleButton extends StatelessWidget {
-  final screen;
+  final String screen;
   final VoidCallback? onPressed;
   final TextStyle? textTheme;
 
