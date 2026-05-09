@@ -38,19 +38,6 @@ class _SendScreenState extends State<SendScreen> {
     });
   }
 
-  void _checkConnection() {
-    final conn = context.read<ConnectivityProvider>();
-    if (!conn.isOnRobotWifi && !_uploading) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Conexión con el robot perdida'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      Navigator.pop(context);
-    }
-  }
-
   Future<void> _uploadFirmware() async {
     setState(() {
       _uploading = true;
@@ -124,39 +111,20 @@ class _SendScreenState extends State<SendScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("OTA Flasher – ESP8266"),
-        backgroundColor: theme.colorScheme.inversePrimary,
-      ),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.indigo.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.indigo.shade200),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.wifi, color: Colors.indigo),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      "Conecta el móvil al WiFi 'ESP8266-OTA' antes de flashear",
-                      style: TextStyle(fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             const SizedBox(height: 16),
-
             FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.primaryColorLight, 
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: theme.primaryColorLight,
+                disabledForegroundColor: Colors.white,
+              ),
               onPressed: !_uploading && conn.isOnRobotWifi ? _uploadFirmware : null,
               icon: _uploading
                   ? const SizedBox(
@@ -168,32 +136,29 @@ class _SendScreenState extends State<SendScreen> {
                       ),
                     )
                   : Icon(conn.isOnRobotWifi ? Icons.upload : Icons.wifi_find),
-              label: Text(_uploading ? "Flasheando…" : "Flashear por OTA"),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+              label: Text(
+                _uploading ? "Flasheando…" : "Flashear por OTA",
+                style: theme.textTheme.titleMedium,
               ),
             ),
 
             const SizedBox(height: 24),
 
-            Text("Consola", style: theme.textTheme.labelMedium),
+            Text("Consola", style: theme.textTheme.titleMedium),
             const SizedBox(height: 6),
 
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(8),
+                  color: theme.scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.blue, width: 5),
                 ),
                 child: SingleChildScrollView(
                   child: Text(
                     _log.isEmpty ? "Esperando…" : _log,
-                    style: const TextStyle(
-                      fontFamily: "monospace",
-                      fontSize: 12,
-                      color: Colors.greenAccent,
-                    ),
+                    style: theme.textTheme.titleMedium,
                   ),
                 ),
               ),

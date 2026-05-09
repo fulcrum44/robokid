@@ -58,7 +58,9 @@ class _BlockScreenState extends State<BlockScreen> {
       _firebaseProjectsLoad(_projectId!);
     }
 
-    if (widget.themeMode != null && widget.themeMode != oldWidget.themeMode && _loaded) {
+    if (widget.themeMode != null &&
+        widget.themeMode != oldWidget.themeMode &&
+        _loaded) {
       _controller.runJavaScript("setBlocklyTheme('${widget.themeMode}')");
     }
   }
@@ -240,15 +242,12 @@ class _BlockScreenState extends State<BlockScreen> {
         final theme = Theme.of(context);
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,
-          title: Text(
-            'Nombre del proyecto',
-            style: theme.textTheme.titleLarge
-          ),
+          title: Text('Nombre del proyecto', style: theme.textTheme.titleLarge),
           content: TextField(
             controller: controller,
             autofocus: true,
             style: theme.textTheme.titleMedium,
-            decoration: const InputDecoration(hintText: 'Ej: Mi robot'),
+            decoration: InputDecoration(hintText: 'Ej: Mi robot'),
           ),
           actions: [
             TextButton(
@@ -401,8 +400,11 @@ class _BlockScreenState extends State<BlockScreen> {
                           if (_code != null) {
                             Clipboard.setData(ClipboardData(text: _code!));
                             ScaffoldMessenger.of(context).showSnackBar(
-                               SnackBar(
-                                content: Text('Código copiado', style: theme.textTheme.titleMedium,),
+                              SnackBar(
+                                content: Text(
+                                  'Código copiado',
+                                  style: theme.textTheme.titleMedium,
+                                ),
                                 duration: Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -455,6 +457,7 @@ class _BlockScreenState extends State<BlockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final auth = context.watch<AuthProvider>();
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
@@ -492,16 +495,15 @@ class _BlockScreenState extends State<BlockScreen> {
 
                 // boton para compilar (generar codigo arduino)
                 ElevatedButton(
-                  style: ButtonStyle().copyWith(
-
-                  ),
                   key: Key('compilar'),
                   onPressed: _loaded ? _compile : null,
                   child: const Icon(Icons.play_arrow),
                 ),
 
-                FloatingActionButton.extended(
-                  heroTag: 'enviar',
+                if (!isGuest) const SizedBox(width: 12),
+
+                ElevatedButton(
+                  key: Key('enviar'),
                   onPressed:
                       _firmwareBytes != null && conn.isOnRobotWifi // solo activo si hay .bin y estamos conectados al robot
                       ? () => Navigator.push(
@@ -514,7 +516,10 @@ class _BlockScreenState extends State<BlockScreen> {
                           ),
                         )
                       : null,
-                  label: const Text('ENVIAR'),
+                  child: Text(
+                    'Grabar en Placa',
+                    style: theme.textTheme.titleSmall,
+                  ),
                 ),
               ],
             ),

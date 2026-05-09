@@ -40,6 +40,26 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
     ),
+    // Estilo de los filledButton
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: robokids,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: robokids,
+        disabledForegroundColor: Colors.white,
+      ),
+    ),
+  // Estilo de los textField
+    inputDecorationTheme: InputDecorationTheme(
+      labelStyle: TextStyle(color: robokids), 
+      enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: robokids), 
+    ),
+    
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: robokids), 
+    ),
+    ),
     // Estilo de los OutlinedButtons
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
@@ -50,6 +70,10 @@ class AppTheme {
     // Estilo de los TextButtons
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(foregroundColor: Colors.lightBlue),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: robokids,
+      selectionHandleColor: robokids,
     ),
     // Estilo de los textos
     textTheme: TextTheme(
@@ -78,7 +102,7 @@ class AppTheme {
     progressIndicatorTheme: ProgressIndicatorThemeData(color: robokids),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
-    )
+    ),
   );
 
   // TEMA OSCURO
@@ -99,6 +123,27 @@ class AppTheme {
         foregroundColor: Colors.white,
       ),
     ),
+    // Estilo de lso filledButton
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: Colors.black,
+        disabledForegroundColor: Colors.white,
+      ),
+    ),
+    // Estilo de los textField
+    inputDecorationTheme: InputDecorationTheme(
+      labelStyle: TextStyle(color: Colors.white), 
+
+      enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.white), 
+    ),
+    
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.white), 
+    ),
+    ),
     // Estilo de los OutlinedButtons
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
@@ -108,7 +153,11 @@ class AppTheme {
     ),
     // Estilo de los TextButtons
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(foregroundColor: Colors.blue),
+      style: TextButton.styleFrom(foregroundColor: robokids),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.white,
+      selectionHandleColor: Colors.white,
     ),
     // Estilo de los textos
     textTheme: TextTheme(

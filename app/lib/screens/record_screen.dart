@@ -98,7 +98,7 @@ class RecordScreenState extends State<RecordScreen> {
               TextField(
                 style: theme.textTheme.titleMedium,
                 controller: nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Nombre del proyecto',
                   border: OutlineInputBorder(),
                 ),
