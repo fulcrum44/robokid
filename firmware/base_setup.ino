@@ -1,0 +1,16 @@
+  pinMode(motorPin11, OUTPUT);
+  pinMode(motorPin12, OUTPUT);
+  pinMode(motorPin13, OUTPUT);
+  pinMode(motorPin14, OUTPUT);
+  pinMode(motorPin21, OUTPUT);
+  pinMode(motorPin22, OUTPUT);
+  pinMode(motorPin23, OUTPUT);
+  pinMode(motorPin24, OUTPUT);
+  digitalWrite(motorPin11, LOW);
+  digitalWrite(motorPin12, LOW);
+  digitalWrite(motorPin13, LOW);
+  digitalWrite(motorPin14, LOW);
+  digitalWrite(motorPin21, LOW);
+  digitalWrite(motorPin22, LOW);
+  digitalWrite(motorPin23, LOW);
+  digitalWrite(motorPin24, LOW);
