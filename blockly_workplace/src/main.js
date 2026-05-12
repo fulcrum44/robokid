@@ -10,6 +10,8 @@ import { esperarSegundos } from './blocks/tiempo.js';
 import './generators/matematicas.js'
 import './generators/control.js'
 import './generators/robot.js'
+import './generators/variables.js'
+import './generators/procedimientos.js'
 
 Blockly.common.defineBlocksWithJsonArray([
   moverRobot, 
@@ -86,6 +88,14 @@ const workspace = Blockly.inject('blocklyDiv', {
           { kind: 'block', type: 'math_number' },
           { kind: 'block', type: 'math_arithmetic' },
         ]
+      },
+      {
+        kind: 'category', name: 'Variables', colour: '#A65C81',
+        custom: 'VARIABLE',
+      },
+      {
+        kind: 'category', name: 'Funciones', colour: '#995BA5',
+        custom: 'PROCEDURE',
       },
     ]
   },
