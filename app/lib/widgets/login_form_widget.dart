@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:robokid/theme/app_theme.dart';
 
 class LoginFormWidget extends StatelessWidget {
   final String? hintText;
@@ -35,10 +36,14 @@ class LoginFormWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final borderColor = theme.brightness == Brightness.light
+        ? AppTheme.robokids
+        : Colors.white;
+
     return TextFormField(
       style: TextStyle(color: theme.textTheme.titleSmall?.color),
       autofocus: false,
-      textCapitalization: TextCapitalization.words,
+      textCapitalization: (hintText!.contains('Correo') || hintText!.contains("Contraseña"))? TextCapitalization.none : TextCapitalization.words,
       keyboardType: keyboardType,
       obscureText: obscureText,
       maxLength: maxLength,
@@ -53,6 +58,10 @@ class LoginFormWidget extends StatelessWidget {
         hintText: hintText,
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30.0),
+          borderSide: BorderSide(color: borderColor, width: 2.0),
+        ),
         counterText: '',
         prefixText: prefixText,
       ),

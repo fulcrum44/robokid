@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:robokid/screens/screens.dart';
+import 'package:robokid/config/config.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:robokid/widgets/widgets.dart';
 import 'package:robokid/services/services.dart';
+import 'dart:typed_data';
 
-import '../providers/auth_provider.dart';
+import '../providers/providers.dart';
 
 class BlockScreen extends StatefulWidget {
   final String? projectId; // si viene un id, cargamos ese proyecto al abrir
@@ -27,6 +30,8 @@ class _BlockScreenState extends State<BlockScreen> {
   String? _projectId; // id del proyecto actual (null si es nuevo)
   String? _projectName; // nombre del proyecto actual
   bool _saving = false;
+
+  Uint8List? _firmwareBytes; // .bin recibido tras compilar
 
   @override
   void initState() {
@@ -53,7 +58,9 @@ class _BlockScreenState extends State<BlockScreen> {
       _firebaseProjectsLoad(_projectId!);
     }
 
-    if (widget.themeMode != null && widget.themeMode != oldWidget.themeMode && _loaded) {
+    if (widget.themeMode != null &&
+        widget.themeMode != oldWidget.themeMode &&
+        _loaded) {
       _controller.runJavaScript("setBlocklyTheme('${widget.themeMode}')");
     }
   }
@@ -128,13 +135,14 @@ class _BlockScreenState extends State<BlockScreen> {
 
   // Empieza el proceso de guardado: primero pide el workspace a Blockly
   void _save() {
+    if (_saving) return;
     _saving = true;
     _getWorkspaceState();
-    // cuando llegue el workspaceState en _onMensaje, se llama a _completarGuardado
   }
 
   // Se ejecuta cuando ya tenemos el workspaceJson actualizado
   Future<void> _completeSave() async {
+    final theme = Theme.of(context);
     final auth = context.read<AuthProvider>();
     final user = auth.user;
 
@@ -156,26 +164,37 @@ class _BlockScreenState extends State<BlockScreen> {
       // si ya existe, preguntamos si sobreescribir o crear uno nuevo
       final option = await showDialog<String>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Guardar proyecto'),
-          content: Text(
-            '¿Quieres sobreescribir "$_projectName" o guardarlo como un nuevo proyecto?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+        builder: (context) {
+          final theme = Theme.of(context);
+          return AlertDialog(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            title: Text('Guardar proyecto', style: theme.textTheme.titleMedium),
+            content: Text(
+              '¿Quieres sobreescribir "$_projectName" o guardarlo como un nuevo proyecto?',
+              style: theme.textTheme.titleMedium,
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'nuevo'),
-              child: const Text('Nuevo proyecto'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, 'sobreescribir'),
-              child: const Text('Sobreescribir'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancelar', style: theme.textTheme.titleMedium),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'nuevo'),
+                child: Text(
+                  'Nuevo proyecto',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, 'sobreescribir'),
+                child: Text(
+                  'Sobreescribir',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+            ],
+          );
+        },
       );
 
       if (option == null) return;
@@ -201,8 +220,11 @@ class _BlockScreenState extends State<BlockScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Proyecto guardado'),
+        SnackBar(
+          content: Text(
+            'Proyecto guardado',
+            style: theme.textTheme.titleMedium,
+          ),
           duration: Duration(seconds: 1),
           behavior: SnackBarBehavior.floating,
         ),
@@ -213,35 +235,28 @@ class _BlockScreenState extends State<BlockScreen> {
   // Dialogo para que el usuario ponga nombre al proyecto
   Future<String?> _getProjectName() async {
     final controller = TextEditingController();
-    final theme = Theme.of(context);
 
     return showDialog<String>(
       context: context,
       builder: (context) {
+        final theme = Theme.of(context);
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,
-          title: Text(
-            'Nombre del proyecto',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
-            ),
-          ),
+          title: Text('Nombre del proyecto', style: theme.textTheme.titleLarge),
           content: TextField(
             controller: controller,
             autofocus: true,
             style: theme.textTheme.titleMedium,
-            decoration: const InputDecoration(hintText: 'Ej: Mi robot'),
+            decoration: InputDecoration(hintText: 'Ej: Mi robot'),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: Text('Cancelar', style: theme.textTheme.titleMedium),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: const Text('Guardar'),
+              child: Text('Guardar', style: theme.textTheme.titleMedium),
             ),
           ],
         );
@@ -249,18 +264,27 @@ class _BlockScreenState extends State<BlockScreen> {
     );
   }
 
-  // url del servidor de compilacion (cambiar segun donde este desplegado)
-  static const _urlServer = 'https://democrat-hence-safehouse.ngrok-free.dev';
-
   // Manda el código al servidor para compilarlo
   Future<void> _compilarYSubir() async {
+    final theme = Theme.of(context);
     if (_code == null || _code!.isEmpty) return;
+
+    final conn = context.read<ConnectivityProvider>();
+    
+    if (!conn.hasInternet) {
+      CustomSnackBar.showSnackBar(
+        'Es necesario estar conectado a internet para compilar',
+        context,
+        theme
+      );
+      return;
+    }
 
     // mostramos que estamos compilando
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Compilando...'),
+        SnackBar(
+          content: Text('Compilando...', style: theme.textTheme.titleMedium),
           duration: Duration(seconds: 30),
           behavior: SnackBarBehavior.floating,
         ),
@@ -269,18 +293,28 @@ class _BlockScreenState extends State<BlockScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('$_urlServer/compile'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'codigo': _code, 'placa': 'esp8266:esp8266:d1'}),
+        Uri.parse('${AppConfig.serverUrl}/compile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${AppConfig.compilerApiToken}',
+        },
+        body: jsonEncode({
+          'codigo': _code,
+          'placa': 'esp8266:esp8266:d1',
+        }),
       );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       if (response.statusCode == 200) {
+        setState(() => _firmwareBytes = response.bodyBytes);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compilación exitosa'),
+          SnackBar(
+            content: Text(
+              'Compilación exitosa — Desactiva los datos móviles y pulsa ENVIAR para flashear',
+              style: theme.textTheme.titleMedium,
+            ),
             duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
@@ -296,7 +330,10 @@ class _BlockScreenState extends State<BlockScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No se pudo conectar al servidor: $e'),
+          content: Text(
+            'No se pudo conectar al servidor: $e',
+            style: theme.textTheme.titleMedium,
+          ),
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
         ),
@@ -308,21 +345,25 @@ class _BlockScreenState extends State<BlockScreen> {
   void _showCompilingErrorMessage(String error) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error de compilación'),
-        content: SingleChildScrollView(
-          child: SelectableText(
-            error,
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          title: Text(
+            'Error de compilación',
+            style: theme.textTheme.titleMedium,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+          content: SingleChildScrollView(
+            child: SelectableText(error, style: theme.textTheme.titleMedium),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cerrar', style: theme.textTheme.titleMedium),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -338,6 +379,7 @@ class _BlockScreenState extends State<BlockScreen> {
       isScrollControlled: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       builder: (context) {
+        final theme = Theme.of(context);
         return Container(
           height: MediaQuery.of(context).size.height * 0.5,
           padding: const EdgeInsets.all(16),
@@ -348,10 +390,7 @@ class _BlockScreenState extends State<BlockScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Código Arduino',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('Código Arduino', style: theme.textTheme.titleMedium),
                   Row(
                     children: [
                       IconButton(
@@ -361,8 +400,11 @@ class _BlockScreenState extends State<BlockScreen> {
                           if (_code != null) {
                             Clipboard.setData(ClipboardData(text: _code!));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Código copiado'),
+                              SnackBar(
+                                content: Text(
+                                  'Código copiado',
+                                  style: theme.textTheme.titleMedium,
+                                ),
                                 duration: Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -382,7 +424,7 @@ class _BlockScreenState extends State<BlockScreen> {
                         ),
 
                       IconButton(
-                        icon: const Icon(Icons.upload),
+                        icon: const Icon(Icons.play_circle_outline_sharp),
                         tooltip: 'Compilar y subir',
                         onPressed: () {
                           Navigator.pop(context);
@@ -402,10 +444,7 @@ class _BlockScreenState extends State<BlockScreen> {
                 child: SingleChildScrollView(
                   child: SelectableText(
                     _code ?? '',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontFamily: 'monospace',
-                      fontSize: 13,
-                    ),
+                    style: theme.textTheme.titleSmall,
                   ),
                 ),
               ),
@@ -418,14 +457,18 @@ class _BlockScreenState extends State<BlockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final auth = context.watch<AuthProvider>();
     // Si no hay usuario es que está en modo invitado
     final bool isGuest = auth.isGuest;
+
+    final conn = context.watch<ConnectivityProvider>();
 
     return Scaffold(
       appBar: CustomAppBar(),
       body: Column(
         children: [
+          const ConnectivityBanner(),
           Expanded(child: WebViewWidget(controller: _controller)),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -433,31 +476,50 @@ class _BlockScreenState extends State<BlockScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // boton para limpiar el workspace
-                FloatingActionButton(
-                  heroTag: 'limpiar',
+                ElevatedButton(
+                  key: Key('limpiar'),
                   onPressed: _loaded ? _cleanWorkspace : null,
-                  backgroundColor: _loaded ? null : Colors.grey,
                   child: const Icon(Icons.delete_outline),
                 ),
                 const SizedBox(width: 12),
 
                 // boton para guardar el proyecto
                 if (!isGuest)
-                  FloatingActionButton(
-                    heroTag: 'guardar',
-                    onPressed: _loaded ? _save : null,
-                    backgroundColor: _loaded ? null : Colors.grey,
+                  ElevatedButton(
+                    key: Key('guardar'),
+                    onPressed: _loaded && conn.hasInternet ? _save : null,
                     child: const Icon(Icons.save),
                   ),
 
                 if (!isGuest) const SizedBox(width: 12),
 
                 // boton para compilar (generar codigo arduino)
-                FloatingActionButton(
-                  heroTag: 'compilar',
+                ElevatedButton(
+                  key: Key('compilar'),
                   onPressed: _loaded ? _compile : null,
-                  backgroundColor: _loaded ? null : Colors.grey,
                   child: const Icon(Icons.play_arrow),
+                ),
+
+                if (!isGuest) const SizedBox(width: 12),
+
+                ElevatedButton(
+                  key: Key('enviar'),
+                  onPressed:
+                      _firmwareBytes != null && conn.isOnRobotWifi // solo activo si hay .bin y estamos conectados al robot
+                      ? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SendScreen(
+                              firmwareBytes: _firmwareBytes!,
+                              firmwareName: 'firmware.bin',
+                            ),
+                          ),
+                        )
+                      : null,
+                  child: Text(
+                    'Grabar en Placa',
+                    style: theme.textTheme.titleSmall,
+                  ),
                 ),
               ],
             ),

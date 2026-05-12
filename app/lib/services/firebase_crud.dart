@@ -6,7 +6,7 @@ Future<List<Map<String, dynamic>>> getUsers() async {
   List<Map<String, dynamic>> users = [];
 
   QuerySnapshot query = await usersDB
-      .collection("Proyectos")
+      .collection("Usuarios")
       .get();
 
   for (var documento in query.docs) {

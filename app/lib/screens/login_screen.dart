@@ -19,10 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool buttonIsLoading = false;
   // Booleano para el icono para ver la contraseña
   bool obscureText = true;
-  // BORRAR ?
-  bool showButtons = false;
-
-  final FirebaseServices firebaseServices = FirebaseServices();
 
   @override
   void initState() {
@@ -63,10 +59,15 @@ class _LoginScreenState extends State<LoginScreen> {
         // Para que el teclado no empuje los SnackBars
         resizeToAvoidBottomInset: false,
         body: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            vertical: MediaQuery.of(context).size.height * 0.0225,
+            horizontal: MediaQuery.of(context).size.height * 0.0225,
+          ),
           child: SizedBox(
             width: double.infinity,
             child: Column(
               children: [
+                const ConnectivityBanner(),
                 // Contenedor primario
                 Container(
                   alignment: Alignment.center,
@@ -133,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                  color: containerBorder,
+                                  color: Colors.white,
                                   strokeWidth: 2,
                                 ),
                               )
@@ -263,11 +264,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    title: const Text('Cuenta ya existente'),
-                                    content: const Text(
+                                    backgroundColor: theme.scaffoldBackgroundColor,
+                                    title: Text('Cuenta ya existente', style: theme.textTheme.titleLarge,),
+                                    content: Text(
                                       'Ya tienes una cuenta con ese correo. '
                                       'Inicia sesión con tu contraseña y desde dentro '
                                       'de la app podrás vincular Google.',
+                                      style: theme.textTheme.titleMedium,
                                     ),
                                     actions: [
                                       TextButton(
