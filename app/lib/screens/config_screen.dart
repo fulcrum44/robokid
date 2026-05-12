@@ -411,12 +411,15 @@ class _ConfigScreenState extends State<ConfigScreen> {
           );
 
           try {
+            await Future.delayed(const Duration(seconds: 2));
+            if (mounted) Navigator.pop(context);
+
             await FirebaseServices().logout();
 
             if (mounted) {
               Navigator.pushNamedAndRemoveUntil(
                 context,
-                'login',
+                'wrapper',
                 (route) => false,
               );
             }

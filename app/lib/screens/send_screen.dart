@@ -54,7 +54,7 @@ class _SendScreenState extends State<SendScreen> {
       final request = http.MultipartRequest("POST", url);
 
       request.files.add(
-        await http.MultipartFile.fromBytes(
+        http.MultipartFile.fromBytes(
           "firmware",
           widget.firmwareBytes,
           filename: "firmware.bin",

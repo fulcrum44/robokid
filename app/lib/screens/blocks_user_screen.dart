@@ -121,6 +121,17 @@ class _BlockScreenState extends State<BlockScreen> {
     });
   }
 
+  // Limpia todos los bloques del editor para guardar un nuevo archivo
+  Future<void> _newProject() async {
+    await _controller.runJavaScript('clearWorkspace()');
+    setState(() {
+      _code = null;
+      _workspaceJson = null;
+      _projectId = null;
+      _projectName = null;
+    });
+  }
+
   // Carga un proyecto de Firestore y lo mete en el editor
   Future<void> _firebaseProjectsLoad(String projectId) async {
     final proyecto = await getProyecto(projectId);
@@ -475,13 +486,22 @@ class _BlockScreenState extends State<BlockScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
+                // boton para limpiar el workspace
+                ElevatedButton(
+                  key: Key('nuevoProyecto'),
+                  onPressed: _loaded ? _newProject : null,
+                  child: const Icon(Icons.assignment_add),
+                ),
+
+                const SizedBox(width: 8),
                 // boton para limpiar el workspace
                 ElevatedButton(
                   key: Key('limpiar'),
                   onPressed: _loaded ? _cleanWorkspace : null,
                   child: const Icon(Icons.delete_outline),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
 
                 // boton para guardar el proyecto
                 if (!isGuest)
@@ -491,7 +511,7 @@ class _BlockScreenState extends State<BlockScreen> {
                     child: const Icon(Icons.save),
                   ),
 
-                if (!isGuest) const SizedBox(width: 12),
+                if (!isGuest) const SizedBox(width: 8),
 
                 // boton para compilar (generar codigo arduino)
                 ElevatedButton(
@@ -500,7 +520,7 @@ class _BlockScreenState extends State<BlockScreen> {
                   child: const Icon(Icons.play_arrow),
                 ),
 
-                if (!isGuest) const SizedBox(width: 12),
+                if (!isGuest) const SizedBox(width: 8),
 
                 ElevatedButton(
                   key: Key('enviar'),
@@ -517,7 +537,7 @@ class _BlockScreenState extends State<BlockScreen> {
                         )
                       : null,
                   child: Text(
-                    'Grabar en Placa',
+                    'Grabar',
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
