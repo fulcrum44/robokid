@@ -114,7 +114,7 @@ class ConnectivityProvider extends ChangeNotifier {
   Future<bool> _isRobotReachable() async {
     try {
       final socket = await Socket.connect(
-        '192.168.1.134',
+        '192.168.4.1',
         80,
         timeout: const Duration(seconds: 2),
       );
