@@ -40,6 +40,9 @@ class ConnectivityProvider extends ChangeNotifier {
 
   Timer? _pollingTimer;
 
+  int _robotFailCount = 0;
+  static const int _maxFailsBeforeDisconnect = 3;
+
   Future<void> _init() async {
     await _checkConnection();
     _subscription = _connectivity.onConnectivityChanged.listen((_) {
@@ -60,6 +63,7 @@ class ConnectivityProvider extends ChangeNotifier {
 
     // Ninguna conexión activa
     if (result.contains(ConnectivityResult.none) || result.isEmpty) {
+      _robotFailCount = 0;
       _updateState(AppConnectionState.offline);
       _setInitialized();
       return;
@@ -68,9 +72,18 @@ class ConnectivityProvider extends ChangeNotifier {
     // Si hay WiFi, comprobar si es el robot primero
     if (result.contains(ConnectivityResult.wifi)) {
       if (await _isRobotReachable()) {
+         _robotFailCount = 0;
         _updateState(AppConnectionState.robotWifi);
         _setInitialized();
         return;
+      } else if (_state == AppConnectionState.robotWifi) {
+        // Estábamos conectados al robot pero no queremos cambiar el estado al primer fallo ocurrido
+        _robotFailCount++;
+        if (_robotFailCount < _maxFailsBeforeDisconnect) {
+          _setInitialized();
+          return; // Mantenemos estado robotWifi hasta acumular 3 fallos
+        }
+        _robotFailCount = 0;
       }
     }
 
