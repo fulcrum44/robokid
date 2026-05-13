@@ -11,14 +11,15 @@ class ConnectivityBanner extends StatelessWidget {
 
     if (!conn.initialized || conn.hasInternet) return const SizedBox.shrink();
 
-    final isRobot = conn.isOnRobotWifi;
+    final isRobot = conn.state == AppConnectionState.robotWifi;
+    final dataOn = conn.mobileDataEnabled;
 
     return Column(
       children: [
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          color: isRobot ? Colors.orange.shade700 : Colors.red.shade700,
+          color: isRobot ? (dataOn ? Colors.orange.shade800 : Colors.orange.shade700) : Colors.red.shade700,
           child: Row(
             children: [
               Icon(
@@ -30,7 +31,7 @@ class ConnectivityBanner extends StatelessWidget {
               Expanded(
                 child: Text(
                   isRobot
-                      ? 'Conectado al robot — sin acceso a internet'
+                      ? (dataOn ? 'Conectado al robot - desactiva los datos móviles' : 'Conectado al robot - sin acceso a internet')
                       : 'Sin conexión a internet',
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
