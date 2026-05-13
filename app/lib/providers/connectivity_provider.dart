@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:robokid/services/services.dart';
 
 enum AppConnectionState {
   online, // Conectado a internet
@@ -18,10 +19,14 @@ class ConnectivityProvider extends ChangeNotifier {
   AppConnectionState get state => _state;
 
   bool _mobileDataActive = false;
-  bool get movileDataACtive => _mobileDataActive;
+  bool get mobileDataActive => _mobileDataActive;
+
+  
+  bool _mobileDataEnabled = false;
+  bool get mobileDataEnabled => _mobileDataEnabled;
 
   bool get hasInternet => _state == AppConnectionState.online;
-  bool get isOnRobotWifi => _state == AppConnectionState.robotWifi && !_mobileDataActive;
+  bool get isOnRobotWifi => _state == AppConnectionState.robotWifi && !_mobileDataEnabled;
   bool get isOffile => _state == AppConnectionState.offline;
 
 
@@ -33,6 +38,8 @@ class ConnectivityProvider extends ChangeNotifier {
     _init();
   }
 
+  Timer? _pollingTimer;
+
   Future<void> _init() async {
     await _checkConnection();
     _subscription = _connectivity.onConnectivityChanged.listen((_) {
@@ -43,8 +50,13 @@ class ConnectivityProvider extends ChangeNotifier {
   Future<void> _checkConnection() async {
     final result = await _connectivity.checkConnectivity();
 
-    // Primero comprobamos si la conexión a internet es media datos móviles
-    _mobileDataActive = result.contains(ConnectivityResult.mobile);
+    // Primero comprobamos si los datos móviles están activados o desactivados
+    final oldMobileData = _mobileDataEnabled;
+    _mobileDataEnabled = await MobileDataChecker.isMobileDataEnabled();
+
+    if (oldMobileData != _mobileDataEnabled) {
+      notifyListeners();
+    }
 
     // Ninguna conexión activa
     if (result.contains(ConnectivityResult.none) || result.isEmpty) {
@@ -101,12 +113,13 @@ class ConnectivityProvider extends ChangeNotifier {
 
   Future<bool> _isRobotReachable() async {
     try {
-      final response = await HttpClient()
-          .getUrl(Uri.parse('http://192.168.4.1/status'))
-          .timeout(const Duration(seconds: 15))
-          .then((req) => req.close())
-          .timeout(const Duration(seconds: 15));
-      return response.statusCode == 200;
+      final socket = await Socket.connect(
+        '192.168.1.134',
+        80,
+        timeout: const Duration(seconds: 2),
+      );
+      socket.destroy();
+      return true;
     } catch (_) {
       return false;
     }
@@ -117,10 +130,33 @@ class ConnectivityProvider extends ChangeNotifier {
       _state = newState;
       notifyListeners();
     }
+    // Cuando estamos cerca del robot, activar polling rápido
+    if (_state == AppConnectionState.robotWifi || _couldBeRobotWifi()) {
+      _startPolling();
+    } else {
+      _stopPolling();
+    }
   }
 
   Future<void> refresh() async {
     await _checkConnection();
+  }
+
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _checkConnection();
+    });
+  }
+
+  void _stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  bool _couldBeRobotWifi() {
+    // Si tenemos WiFi pero no internet, podríamos estar en el robot
+    return _state == AppConnectionState.offline && !_mobileDataEnabled;
   }
 
   @override
